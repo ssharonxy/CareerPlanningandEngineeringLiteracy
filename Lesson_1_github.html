@@ -115,6 +115,87 @@
   .online-item a { color: var(--color-primary-bright); text-decoration: none; }
   .online-item a:hover { text-decoration: underline; }
 </style>
+<style id="pano-css">
+  .pano-app {
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+    background: radial-gradient(900px 500px at 50% -10%, #1b2a4a 0%, #0f1729 45%, #070a13 100%);
+    color: #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .pano-app .tab-bar { display: flex; gap: 8px; padding: 12px 16px 0; flex-shrink: 0; }
+  .pano-app .tab-btn {
+    padding: 6px 16px; font-size: 13px; font-weight: 600; cursor: pointer;
+    border: 1px solid rgba(148,163,184,.25); border-radius: 999px;
+    background: rgba(15,23,41,.6); color: #94a3b8; transition: .2s;
+  }
+  .pano-app .tab-btn.active { background: linear-gradient(135deg, #7c3aed, #2563eb); color: #fff; border-color: transparent; }
+  .pano-app .tab-btn:hover:not(.active) { color: #e2e8f0; background: rgba(30,41,59,.8); }
+  .pano-app .app-frame { flex: 1; display: flex; flex-direction: column; padding: 8px 16px 12px; }
+  .pano-app .app-header {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 8px 4px; border-bottom: 1px solid rgba(148,163,184,.18); flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+  .pano-app .brand { display: flex; align-items: center; gap: 8px; }
+  .pano-app .brand .dot { width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 10px currentColor; }
+  .pano-app .brand h1 { font-size: 13px; font-weight: 700; color: #f1f5f9; }
+  .pano-app .brand .sub { font-size: 11px; color: #94a3b8; margin-left: 4px; }
+  .pano-app .controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .pano-app .btn {
+    border: 1px solid rgba(148,163,184,.35); background: rgba(30,41,59,.75);
+    color: #e2e8f0; padding: 4px 12px; border-radius: 999px; font-size: 12px;
+    cursor: pointer; transition: .18s;
+  }
+  .pano-app .btn:hover { background: rgba(51,65,85,.95); border-color: #8b5cf6; }
+  .pano-app .btn.primary { background: linear-gradient(135deg, #7c3aed, #2563eb); border-color: transparent; color: #fff; font-weight: 600; }
+  .pano-app .btn:disabled { opacity: .35; cursor: not-allowed; }
+  .pano-app #step-indicator { font-size: 11px; color: #94a3b8; min-width: 44px; text-align: center; }
+  .pano-app .main-area { display: flex; flex: 1; min-height: 0; }
+  .pano-app .stage { flex: 1; position: relative; overflow: hidden; }
+  .pano-app #diagram { width: 100%; height: 100%; display: block; cursor: grab; }
+  .pano-app #diagram:active { cursor: grabbing; }
+  .pano-app #zoom-controls { position: absolute; left: 10px; bottom: 10px; display: flex; gap: 4px; z-index: 20; }
+  .pano-app #zoom-controls button {
+    width: 28px; height: 28px; border-radius: 8px;
+    border: 1px solid rgba(148,163,184,.3); background: rgba(15,23,41,.85);
+    color: #cbd5e1; font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .pano-app .node { opacity: 0; pointer-events: none; transition: opacity .4s ease; cursor: pointer; }
+  .pano-app .node.visible { opacity: 1; pointer-events: auto; }
+  .pano-app .node-body { transition: transform .18s ease, filter .25s ease; filter: drop-shadow(0 4px 10px rgba(0,0,0,.5)); }
+  .pano-app .node:hover .node-body { transform: translateY(-3px); }
+  .pano-app .node.selected .node-body { filter: drop-shadow(0 0 12px rgba(139,92,246,.95)); }
+  .pano-app .node-body rect { fill: #fff; stroke: #94a3b8; stroke-width: 2; }
+  .pano-app .node.kind-root .node-body rect { stroke: #8b5cf6; stroke-width: 3; }
+  .pano-app .node.kind-hub .node-body rect { stroke: #22d3ee; stroke-width: 2.4; }
+  .pano-app .node.kind-year .node-body rect { stroke: #34d399; stroke-width: 2.4; }
+  .pano-app .node.selected .node-body rect { stroke: #a78bfa; stroke-width: 3.2; }
+  .pano-app .node-label { fill: #0f172a; font-size: 13px; font-weight: 600; text-anchor: middle; pointer-events: none; }
+  .pano-app .node.kind-root .node-label { font-size: 15px; font-weight: 800; }
+  .pano-app .node.kind-hub .node-label { font-size: 14px; font-weight: 700; }
+  .pano-app .node-icon { font-size: 17px; text-anchor: middle; pointer-events: none; }
+  .pano-app .node.kind-root .node-icon { font-size: 21px; }
+  .pano-app .edge path { fill: none; stroke: #7dd3fc; stroke-width: 2; stroke-opacity: .8; }
+  .pano-app .edge-label {
+    fill: #bae6fd; font-size: 11px; font-weight: 600;
+    paint-order: stroke; stroke: #0b1020; stroke-width: 4px;
+    text-anchor: middle; pointer-events: none;
+  }
+  .pano-app #panel {
+    width: 240px; flex: none; border-left: 1px solid rgba(148,163,184,.18);
+    background: rgba(15,23,41,.88); padding: 12px; overflow-y: auto;
+  }
+  .pano-app .panel-tag { font-size: 10px; letter-spacing: 1.4px; color: #64748b; font-weight: 700; margin-bottom: 10px; }
+  .pano-app .panel-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .pano-app .panel-icon { font-size: 20px; }
+  .pano-app .panel-head h2 { font-size: 13px; color: #f8fafc; font-weight: 700; }
+  .pano-app .panel-body { font-size: 11.5px; line-height: 1.7; color: #cbd5e1; }
+  .pano-app .panel-body b { color: #a5b4fc; }
+</style>
 </head>
 <body>
 <div class="deck">
@@ -308,24 +389,64 @@
 
   <!-- 8. Job panorama (three majors) -->
   <section class="slide">
-    <div class="slide-caption">第8页·智能工程五大岗位群全景</div>
-    <div class="slide-stage">
-      <h1 class="slide-title">智能工程五大岗位群全景</h1>
-      <div class="title-divider thick"></div>
-      <table class="data-table">
-        <colgroup><col style="width:14%"><col style="width:28.7%"><col style="width:28.7%"><col style="width:28.6%"></colgroup>
-        <thead>
-          <tr><th>维度</th><th>电信方向</th><th>智科智生方向</th><th>软件视听方向</th></tr>
-        </thead>
-        <tbody>
-          <tr><td class="dim-col">岗位群1</td><td>嵌入式开发：底层驱动/RTOS/硬件调试</td><td>算法工程：推荐/分类/优化算法设计</td><td>前端开发：界面交互/框架开发</td></tr>
-          <tr><td class="dim-col">岗位群2</td><td>硬件设计：原理图/PCB/器件选型</td><td>数据分析：采集清洗/可视化/报表</td><td>后端开发：API/数据库/架构设计</td></tr>
-          <tr><td class="dim-col">岗位群3</td><td>通信工程：协议栈/网络部署/信号处理</td><td>机器学习：模型训练/调优/AB测试</td><td>全栈工程：前后端贯通/项目交付</td></tr>
-          <tr><td class="dim-col">岗位群4</td><td>信号与算法：DSP/图像处理/模式识别</td><td>大数据开发：分布式存储/计算引擎</td><td>音视频开发：编解码/播放器/直播</td></tr>
-          <tr><td class="dim-col">岗位群5</td><td>测试与运维：质量保障/自动化测试</td><td>AI产品与运维：产品设计/部署监控</td><td>测试与运维：质量保障/自动化测试</td></tr>
-        </tbody>
-      </table>
-      <div class="summary-bar"><p>互动任务：在思维导图上点击本专业感兴趣的岗位，记录职责描述与能力要求——这是作业1收集JD的方向来源</p></div>
+    <div class="slide-caption">第8页·智能工程五大岗位群全景（互动）</div>
+    <div class="slide-stage" style="padding: 16px;">
+      <h1 class="slide-title" style="font-size:22px;margin-bottom:8px;">智能工程五大岗位群全景（互动探索）</h1>
+      <div class="title-divider thick" style="margin-bottom:8px;"></div>
+      <div class="pano-app" style="height:440px;border-radius:8px;overflow:hidden;">
+<div class="tab-bar">
+  <button class="tab-btn active" data-key="dianxin">📡 电信方向</button>
+  <button class="tab-btn" data-key="zhike">🤖 智科智生方向</button>
+  <button class="tab-btn" data-key="ruanjian">💻 软件视听方向</button>
+</div>
+
+<div class="app-frame">
+  <div class="app-header">
+    <div class="brand">
+      <span class="dot" id="brand-dot" style="background:#60a5fa;color:#60a5fa;"></span>
+      <h1 id="brand-title">电信方向 · 职业发展全景图</h1>
+      <span class="sub" id="brand-sub">嵌入式 / 硬件 / 通信 / 信号 / 测试运维</span>
+    </div>
+    <div class="controls">
+      <button class="btn" id="btn-prev">← 上一步</button>
+      <span id="step-indicator">1 / 16</span>
+      <button class="btn primary" id="btn-next">下一步 →</button>
+      <button class="btn" id="btn-all">全部展开</button>
+      <button class="btn" id="btn-reset">重置</button>
+    </div>
+  </div>
+  <div class="main-area">
+    <div class="stage">
+      <svg id="diagram" viewBox="0 0 1500 1000" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#7dd3fc"></path>
+          </marker>
+          <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.18"></stop>
+            <stop offset="100%" stop-color="#60a5fa" stop-opacity="0"></stop>
+          </radialGradient>
+        </defs>
+        <g id="world">
+          <circle cx="750" cy="430" r="340" fill="url(#glow)"></circle>
+          <g id="edge-layer"></g>
+          <g id="node-layer"></g>
+        </g>
+      </svg>
+      <div id="zoom-controls">
+        <button id="zoom-in">+</button>
+        <button id="zoom-out">−</button>
+        <button id="zoom-fit">⤢</button>
+      </div>
+    </div>
+    <aside id="panel">
+      <div class="panel-tag">节点详情</div>
+      <div id="panel-content"></div>
+    </aside>
+  </div>
+</div>
+</div>
+      <div class="summary-bar" style="margin-top:8px;"><p>互动任务：切换本专业页签，点击感兴趣的岗位查看职责与能力要求——这是作业1收集JD的方向来源</p></div>
     </div>
   </section>
 
@@ -594,5 +715,421 @@
   </section>
 
 </div>
+<script id="pano-js">
+
+var DATA = {
+  dianxin: {
+    color: "#60a5fa",
+    title: "电信方向 · 职业发展全景图",
+    sub: "嵌入式 / 硬件 / 通信 / 信号 / 测试运维",
+    nodes: [
+      { id:"root", label:"电信方向\n职业发展全景图", icon:"📡", kind:"root", x:750, y:430, w:250, h:96,
+        details:"电子信息工程专业的职业全景：<b>五大岗位群</b> → <b>四类核心能力</b> → <b>四年成长路径</b>。<br><br>核心方法：用岗位 JD 反推学习计划——从硬件电路到通信协议，从嵌入式驱动到信号处理，每一步都对标真实岗位要求。" },
+      { id:"hub-jobs", label:"五大岗位群", icon:"🧩", kind:"hub", x:440, y:430,
+        details:"电子信息工程毕业生的五类主流去向：<b>嵌入式开发、硬件设计、通信工程、信号与算法、测试与运维</b>。<br><br>共享电路、编程、通信基础，差别在于侧重的工具链与应用场景。" },
+      { id:"j1", label:"嵌入式开发", icon:"🔌", kind:"leaf", x:140, y:140,
+        details:"岗位场景：智能家居、车载电子、物联网设备上的固件开发。<br><br>能力要求：C/C++、STM32/ARM、RTOS（FreeRTOS）、通信协议（UART/SPI/I2C/CAN）；模型量化与端侧部署。<br><br>日常：写驱动 → 调外设 → 联调 → 烧录验证。" },
+      { id:"j2", label:"硬件设计", icon:"🔧", kind:"leaf", x:140, y:285,
+        details:"岗位场景：原理图设计、PCB Layout、器件选型与测试。<br><br>能力要求：模拟/数字电路、Altium Designer/Cadence、信号完整性分析；电源与EMC设计基础。<br><br>日常：画原理图 → 布PCB → 打样焊接 → 调试验证。" },
+      { id:"j3", label:"通信工程", icon:"📡", kind:"leaf", x:140, y:430,
+        details:"岗位场景：通信协议栈开发、网络设备部署、无线通信系统调优。<br><br>能力要求：通信原理、TCP/IP协议栈、5G/物联网通信标准；网络规划与优化。<br><br>日常：协议开发 → 联调测试 → 现场部署 → 性能优化。" },
+      { id:"j4", label:"信号与算法", icon:"📊", kind:"leaf", x:140, y:575,
+        details:"岗位场景：DSP开发、图像处理、模式识别算法实现。<br><br>能力要求：数字信号处理（DSP）、MATLAB/Python、算法移植到嵌入式平台；FFT/滤波/特征提取。<br><br>日常：算法仿真 → 定点化 → 移植 → 性能优化。" },
+      { id:"j5", label:"测试与运维", icon:"🛠️", kind:"leaf", x:140, y:720,
+        details:"岗位场景：电子产品质量测试、通信网络运维、自动化测试开发。<br><br>能力要求：自动化测试框架、仪器使用（示波器/频谱仪）、CI/CD、网络故障排查。<br><br>这是决定产品「能不能稳定量产」的关键岗位。" },
+      { id:"hub-ability", label:"四类核心能力", icon:"🧠", kind:"hub", x:1070, y:430,
+        details:"岗位要求归为四类通用能力：<b>电子技术基础、硬件工程能力、通信与算法、协作沟通</b>。<br><br>JD里每条要求都能归入一类；反过来，每门课、每个项目也应明确对标其中一项。" },
+      { id:"c1", label:"电子技术基础", icon:"⚡", kind:"leaf", x:1345, y:190,
+        details:"内容：电路分析、模拟电子技术、数字电子技术、信号与系统。<br><br>这些不是「考试科目」，而是理解硬件为什么这么设计的语言。<br><br>建议：多做实验，用示波器看真实波形，比刷题更有用。" },
+      { id:"c2", label:"硬件工程能力", icon:"⚙️", kind:"leaf", x:1345, y:350,
+        details:"内容：原理图设计、PCB Layout、器件选型、焊接调试、Git版本管理。<br><br>硬件工程能力决定你的设计能不能被复现、量产和维护。<br><br>建议：从一块最小系统板开始完整走一遍流程。" },
+      { id:"c3", label:"通信与算法", icon:"📶", kind:"leaf", x:1345, y:510,
+        details:"内容：通信原理、数字信号处理、MATLAB算法仿真、嵌入式算法移植。<br><br>多问三句：信号从哪来？怎么处理？输出给谁？<br><br>课程实验和竞赛是练算法最好的场景。" },
+      { id:"c4", label:"协作沟通", icon:"🗣️", kind:"leaf", x:1345, y:670,
+        details:"内容：写技术文档、画系统框图、讲清设计方案、跨团队协作。<br><br>硬件方案讲不清楚，等于没做。<br><br>练习：用GitHub写项目README，每次项目结束做5分钟复盘分享。" },
+      { id:"y1", label:"大一 · 打基础", icon:"🌱", kind:"year", x:340, y:900,
+        details:"目标：电路入门 + 编程打底。<br><br>行动清单：学好高数、电路分析、C语言；用面包板做5个以上基础电路实验；装好Git与开发环境；养成写实验报告的习惯。" },
+      { id:"y2", label:"大二 · 做项目", icon:"🧪", kind:"year", x:640, y:900,
+        details:"目标：把知识变成作品。<br><br>行动清单：完成STM32最小系统板设计与调试；参加电子设计竞赛或校内比赛；学会规范提交代码与写README；做1个完整的嵌入式小项目。" },
+      { id:"y3", label:"大三 · 进团队", icon:"🤝", kind:"year", x:940, y:900,
+        details:"目标：进入真实协作环境。<br><br>行动清单：争取实习或加入实验室；体验硬件开发全流程（原理图→PCB→调试）；在五大岗位中确定主攻方向；学习RTOS与通信协议栈。" },
+      { id:"y4", label:"大四 · 拿offer", icon:"🎓", kind:"year", x:1240, y:900,
+        details:"目标：能力对标岗位，拿到offer。<br><br>行动清单：用3-5份岗位JD反查短板并补课；打磨1个有深度的硬件项目；刷题+模拟面试；形成自己的「能力—岗位」对照表。" }
+    ],
+    edges: [
+      { from:"root", to:"hub-jobs", label:"五大岗位群" },
+      { from:"hub-jobs", to:"j1" }, { from:"hub-jobs", to:"j2" },
+      { from:"hub-jobs", to:"j3" }, { from:"hub-jobs", to:"j4" }, { from:"hub-jobs", to:"j5" },
+      { from:"root", to:"hub-ability", label:"四类核心能力" },
+      { from:"hub-ability", to:"c1" }, { from:"hub-ability", to:"c2" },
+      { from:"hub-ability", to:"c3" }, { from:"hub-ability", to:"c4" },
+      { from:"root", to:"y1", label:"四年成长路径" },
+      { from:"y1", to:"y2", label:"动手实践" },
+      { from:"y2", to:"y3", label:"进入团队" },
+      { from:"y3", to:"y4", label:"求职冲刺" }
+    ],
+    revealOrder: ["root","hub-jobs","j1","j2","j3","j4","j5","hub-ability","c1","c2","c3","c4","y1","y2","y3","y4"]
+  },
+  zhike: {
+    color: "#a78bfa",
+    title: "智科智生方向 · 职业发展全景图",
+    sub: "算法 / 数据 / 机器学习 / 大数据 / AI运维",
+    nodes: [
+      { id:"root", label:"智科智生方向\n职业发展全景图", icon:"🤖", kind:"root", x:750, y:430, w:250, h:96,
+        details:"智能科学/数据科学专业的职业全景：<b>五大岗位群</b> → <b>四类核心能力</b> → <b>四年成长路径</b>。<br><br>核心方法：用岗位 JD 反推学习计划——从数学基础到算法工程，从数据管道到AI产品，每一步都对标真实岗位要求。" },
+      { id:"hub-jobs", label:"五大岗位群", icon:"🧩", kind:"hub", x:440, y:430,
+        details:"智科智生毕业生的五类主流去向：<b>算法工程、数据分析、机器学习、大数据开发、AI产品与运维</b>。<br><br>共享编程与数学基础，差别在于侧重的算法方向与工程化程度。" },
+      { id:"j1", label:"算法工程师", icon:"🧠", kind:"leaf", x:140, y:140,
+        details:"岗位场景：推荐/视觉/语音/大模型等方向的模型选型、训练与调优。<br><br>能力要求：线性代数、概率统计、最优化；Python + PyTorch/TensorFlow；能读懂论文并复现baseline。<br><br>日常：跑实验→看指标→迭代，直到指标达标。" },
+      { id:"j2", label:"数据分析师", icon:"📊", kind:"leaf", x:140, y:285,
+        details:"岗位场景：业务数据采集、清洗、可视化与报表，支撑业务决策。<br><br>能力要求：SQL、Python(Pandas)、Tableau/Power BI；统计分析方法；业务理解与数据讲故事。<br><br>日常：取数→分析→可视化→写报告。" },
+      { id:"j3", label:"机器学习工程师", icon:"⚙️", kind:"leaf", x:140, y:430,
+        details:"岗位场景：生产环境模型部署、调优与AB测试。<br><br>能力要求：Scikit-learn/XGBoost、模型评估、MLOps基础；特征工程；模型压缩与部署。<br><br>日常：特征工程→训练→评估→部署→监控。" },
+      { id:"j4", label:"大数据开发", icon:"🗄️", kind:"leaf", x:140, y:575,
+        details:"岗位场景：分布式数据管道搭建、存储与计算引擎开发。<br><br>能力要求：Spark/Flink、Hadoop生态、Kafka；SQL与Python；数据仓库设计。<br><br>日常：数据接入→管道开发→性能优化→稳定性保障。" },
+      { id:"j5", label:"AI产品与运维", icon:"🚀", kind:"leaf", x:140, y:720,
+        details:"岗位场景：AI产品设计与落地、模型上线后的监控与运维。<br><br>能力要求：产品思维、需求分析；模型部署与监控；用户反馈收集与迭代。<br><br>这是连接技术与业务的关键岗位。" },
+      { id:"hub-ability", label:"四类核心能力", icon:"🧠", kind:"hub", x:1070, y:430,
+        details:"岗位要求归为四类通用能力：<b>数学基础、算法工程能力、业务理解、协作沟通</b>。<br><br>JD里每条要求都能归入一类；反过来，每门课、每个项目也应明确对标其中一项。" },
+      { id:"c1", label:"数学基础", icon:"➗", kind:"leaf", x:1345, y:190,
+        details:"内容：线性代数、概率统计、微积分与最优化。<br><br>这些不是「考试科目」，而是理解模型为什么有效的语言。<br><br>建议：公式与代码对照着看，用numpy手写一遍梯度下降，比刷十道题更有用。" },
+      { id:"c2", label:"算法工程能力", icon:"⚙️", kind:"leaf", x:1345, y:350,
+        details:"内容：Python编程、机器学习框架、Git版本管理、代码评审、Linux命令行。<br><br>工程能力决定你的模型能不能上线、能不能被别人维护。<br><br>建议：从一个完整的端到端项目开始练手。" },
+      { id:"c3", label:"业务理解", icon:"🎯", kind:"leaf", x:1345, y:510,
+        details:"内容：把业务问题翻译成技术问题，也就是需求转化。<br><br>多问三句：为谁解决什么问题？用什么指标衡量？成本与收益如何？<br><br>实习与课程项目是练业务理解最好的场景。" },
+      { id:"c4", label:"协作沟通", icon:"🗣️", kind:"leaf", x:1345, y:670,
+        details:"内容：写清楚的技术文档、讲清楚的方案、开有效的站会。<br><br>算法方案讲不清楚，等于没做。<br><br>练习：用GitHub README写项目说明，每次项目结束做5分钟复盘分享。" },
+      { id:"y1", label:"大一 · 打基础", icon:"🌱", kind:"year", x:340, y:900,
+        details:"目标：编程入门 + 数学打底。<br><br>行动清单：学好高数、线代、概率论；用Python完成100+道编程练习；装好Git与Linux环境；养成写注释和README的习惯。" },
+      { id:"y2", label:"大二 · 做项目", icon:"🧪", kind:"year", x:640, y:900,
+        details:"目标：把知识变成作品。<br><br>行动清单：完成2-3个完整小项目（如爬虫+可视化、图像分类demo）；学会规范commit与写README；参加数学建模或Kaggle比赛。" },
+      { id:"y3", label:"大三 · 进团队", icon:"🤝", kind:"year", x:940, y:900,
+        details:"目标：进入真实协作环境。<br><br>行动清单：争取实习或加入实验室；体验从数据采集到模型部署的全流程；在五大岗位中确定主攻方向；学习MLOps基础。" },
+      { id:"y4", label:"大四 · 拿offer", icon:"🎓", kind:"year", x:1240, y:900,
+        details:"目标：能力对标岗位，拿到offer。<br><br>行动清单：用3-5份岗位JD反查短板并补课；打磨1个有深度的算法项目；刷题+模拟面试；形成自己的「能力—岗位」对照表。" }
+    ],
+    edges: [
+      { from:"root", to:"hub-jobs", label:"五大岗位群" },
+      { from:"hub-jobs", to:"j1" }, { from:"hub-jobs", to:"j2" },
+      { from:"hub-jobs", to:"j3" }, { from:"hub-jobs", to:"j4" }, { from:"hub-jobs", to:"j5" },
+      { from:"root", to:"hub-ability", label:"四类核心能力" },
+      { from:"hub-ability", to:"c1" }, { from:"hub-ability", to:"c2" },
+      { from:"hub-ability", to:"c3" }, { from:"hub-ability", to:"c4" },
+      { from:"root", to:"y1", label:"四年成长路径" },
+      { from:"y1", to:"y2", label:"动手实践" },
+      { from:"y2", to:"y3", label:"进入团队" },
+      { from:"y3", to:"y4", label:"求职冲刺" }
+    ],
+    revealOrder: ["root","hub-jobs","j1","j2","j3","j4","j5","hub-ability","c1","c2","c3","c4","y1","y2","y3","y4"]
+  },
+  ruanjian: {
+    color: "#34d399",
+    title: "软件视听方向 · 职业发展全景图",
+    sub: "前端 / 后端 / 全栈 / 音视频 / 测试运维",
+    nodes: [
+      { id:"root", label:"软件视听方向\n职业发展全景图", icon:"💻", kind:"root", x:750, y:430, w:250, h:96,
+        details:"软件工程/广播电视专业的职业全景：<b>五大岗位群</b> → <b>四类核心能力</b> → <b>四年成长路径</b>。<br><br>核心方法：用岗位 JD 反推学习计划——从前端交互到后端架构，从全栈开发到音视频处理，每一步都对标真实岗位要求。" },
+      { id:"hub-jobs", label:"五大岗位群", icon:"🧩", kind:"hub", x:440, y:430,
+        details:"软件视听毕业生的五类主流去向：<b>前端开发、后端开发、全栈工程、音视频开发、测试与运维</b>。<br><br>共享编程与工程基础，差别在于侧重的技术栈与产品形态。" },
+      { id:"j1", label:"前端开发", icon:"🖥️", kind:"leaf", x:140, y:140,
+        details:"岗位场景：Web界面开发、交互设计实现、移动端H5开发。<br><br>能力要求：HTML/CSS/JavaScript、React/Vue框架、TypeScript；性能优化与跨端适配。<br><br>日常：写页面→调样式→联调接口→优化体验。" },
+      { id:"j2", label:"后端开发", icon:"⚙️", kind:"leaf", x:140, y:285,
+        details:"岗位场景：API设计与开发、数据库设计、服务端架构。<br><br>能力要求：一门主力语言（Java/Go/Python/Node.js）、MySQL/Redis、微服务架构；系统设计能力。<br><br>日常：需求分析→API设计→开发→测试→部署。" },
+      { id:"j3", label:"全栈工程", icon:"🔗", kind:"leaf", x:140, y:430,
+        details:"岗位场景：独立完成前后端全流程开发，小团队多面手。<br><br>能力要求：前后端技术栈贯通、数据库设计、部署运维；项目管理与需求转化。<br><br>日常：从原型到上线全流程负责。" },
+      { id:"j4", label:"音视频开发", icon:"🎬", kind:"leaf", x:140, y:575,
+        details:"岗位场景：播放器开发、直播推流/拉流、编解码优化、特效实现。<br><br>能力要求：C/C++、FFmpeg/WebRTC、HLS/DASH协议；GPU渲染基础；音视频同步。<br><br>日常：编解码→流媒体→播放器→性能调优。" },
+      { id:"j5", label:"测试与运维", icon:"🛠️", kind:"leaf", x:140, y:720,
+        details:"岗位场景：自动化测试、CI/CD流水线、线上监控与故障排查。<br><br>能力要求：自动化测试框架（Selenium/Jest）、Docker/K8s、监控告警；代码评审。<br><br>这是决定产品「能不能稳定上线」的关键岗位。" },
+      { id:"hub-ability", label:"四类核心能力", icon:"🧠", kind:"hub", x:1070, y:430,
+        details:"岗位要求归为四类通用能力：<b>编程基础、软件工程能力、产品思维、协作沟通</b>。<br><br>JD里每条要求都能归入一类；反过来，每门课、每个项目也应明确对标其中一项。" },
+      { id:"c1", label:"编程基础", icon:"⌨️", kind:"leaf", x:1345, y:190,
+        details:"内容：数据结构与算法、一门主力语言、计算机网络、操作系统。<br><br>这些不是「考试科目」，而是理解系统为什么这么设计的语言。<br><br>建议：LeetCode按类型刷题，配合实际项目理解。" },
+      { id:"c2", label:"软件工程能力", icon:"⚙️", kind:"leaf", x:1345, y:350,
+        details:"内容：Git版本管理、代码评审、测试驱动开发、CI/CD、Linux命令行。<br><br>工程能力决定你的代码能不能被别人接手、复用和维护。<br><br>建议：从第一个项目就用Git规范管理。" },
+      { id:"c3", label:"产品思维", icon:"🎯", kind:"leaf", x:1345, y:510,
+        details:"内容：把用户需求翻译成技术方案，也就是需求转化。<br><br>多问三句：用户要什么？怎么衡量好不好？技术成本多少？<br><br>课程项目和实习是练产品思维最好的场景。" },
+      { id:"c4", label:"协作沟通", icon:"🗣️", kind:"leaf", x:1345, y:670,
+        details:"内容：写技术文档、讲设计方案、开站会、跨团队协作。<br><br>技术方案讲不清楚，等于没做。<br><br>练习：用GitHub README写项目说明，每次项目结束做5分钟复盘分享。" },
+      { id:"y1", label:"大一 · 打基础", icon:"🌱", kind:"year", x:340, y:900,
+        details:"目标：编程入门 + 数据结构打底。<br><br>行动清单：学好C/Python、数据结构、计算机网络；完成100+道编程练习；装好Git与Linux环境；养成写注释和README的习惯。" },
+      { id:"y2", label:"大二 · 做项目", icon:"🧪", kind:"year", x:640, y:900,
+        details:"目标：把知识变成作品。<br><br>行动清单：完成2-3个完整Web项目（如博客系统、管理后台）；学习一个前端框架和一个后端框架；参加「互联网+」或ACM比赛。" },
+      { id:"y3", label:"大三 · 进团队", icon:"🤝", kind:"year", x:940, y:900,
+        details:"目标：进入真实协作环境。<br><br>行动清单：争取实习或加入开发团队；体验需求评审、分支开发、代码审查全流程；在五大岗位中确定主攻方向；学习部署运维。" },
+      { id:"y4", label:"大四 · 拿offer", icon:"🎓", kind:"year", x:1240, y:900,
+        details:"目标：能力对标岗位，拿到offer。<br><br>行动清单：用3-5份岗位JD反查短板并补课；打磨1个有深度的全栈项目；刷题+模拟面试；形成自己的「能力—岗位」对照表。" }
+    ],
+    edges: [
+      { from:"root", to:"hub-jobs", label:"五大岗位群" },
+      { from:"hub-jobs", to:"j1" }, { from:"hub-jobs", to:"j2" },
+      { from:"hub-jobs", to:"j3" }, { from:"hub-jobs", to:"j4" }, { from:"hub-jobs", to:"j5" },
+      { from:"root", to:"hub-ability", label:"四类核心能力" },
+      { from:"hub-ability", to:"c1" }, { from:"hub-ability", to:"c2" },
+      { from:"hub-ability", to:"c3" }, { from:"hub-ability", to:"c4" },
+      { from:"root", to:"y1", label:"四年成长路径" },
+      { from:"y1", to:"y2", label:"动手实践" },
+      { from:"y2", to:"y3", label:"进入团队" },
+      { from:"y3", to:"y4", label:"求职冲刺" }
+    ],
+    revealOrder: ["root","hub-jobs","j1","j2","j3","j4","j5","hub-ability","c1","c2","c3","c4","y1","y2","y3","y4"]
+  }
+};
+
+(function() {
+  var NS = 'http://www.w3.org/2000/svg';
+  var svg = document.getElementById('diagram');
+  var world = document.getElementById('world');
+  var edgeLayer = document.getElementById('edge-layer');
+  var nodeLayer = document.getElementById('node-layer');
+  var panelContent = document.getElementById('panel-content');
+  var stepIndicator = document.getElementById('step-indicator');
+  var btnPrev = document.getElementById('btn-prev');
+  var btnNext = document.getElementById('btn-next');
+  var btnAll = document.getElementById('btn-all');
+  var btnReset = document.getElementById('btn-reset');
+  var state = null;
+
+  function clearLayer(layer) {
+    while (layer.firstChild) layer.removeChild(layer.firstChild);
+  }
+
+  function boundaryPoint(node, tx, ty) {
+    var dx = tx - node.x, dy = ty - node.y;
+    var len = Math.hypot(dx, dy) || 1;
+    var ux = dx/len, uy = dy/len;
+    var hw = node.w/2, hh = node.h/2;
+    var tX = ux===0 ? Infinity : hw/Math.abs(ux);
+    var tY = uy===0 ? Infinity : hh/Math.abs(uy);
+    var t = Math.min(tX, tY);
+    return { x: node.x + ux*t, y: node.y + uy*t };
+  }
+
+  function buildDiagram(key) {
+    var cfg = DATA[key];
+    var nodes = cfg.nodes.map(function(n) {
+      var obj = { w: 180, h: 70, kind: 'leaf' };
+      for (var k in n) obj[k] = n[k];
+      return obj;
+    });
+    var byId = {};
+    nodes.forEach(function(n) { byId[n.id] = n; });
+
+    clearLayer(edgeLayer);
+    clearLayer(nodeLayer);
+
+    document.getElementById('brand-title').textContent = cfg.title;
+    document.getElementById('brand-sub').textContent = cfg.sub;
+    var dot = document.getElementById('brand-dot');
+    dot.style.background = cfg.color;
+    dot.style.color = cfg.color;
+    var stop = document.querySelector('#glow stop');
+    if (stop) stop.setAttribute('stop-color', cfg.color);
+
+    cfg.edges.forEach(function(e) {
+      var a = byId[e.from], b = byId[e.to];
+      if (!a || !b) return;
+      var start = boundaryPoint(a, b.x, b.y);
+      var rawEnd = boundaryPoint(b, a.x, a.y);
+      var dx = rawEnd.x - start.x, dy = rawEnd.y - start.y;
+      var len = Math.hypot(dx, dy) || 1;
+      var ex = rawEnd.x - (dx/len)*4, ey = rawEnd.y - (dy/len)*4;
+      var g = document.createElementNS(NS, 'g');
+      g.setAttribute('class', 'edge');
+      g.setAttribute('id', 'edge-' + e.from + '-' + e.to);
+      var path = document.createElementNS(NS, 'path');
+      path.setAttribute('d', 'M ' + start.x.toFixed(1) + ' ' + start.y.toFixed(1) + ' L ' + ex.toFixed(1) + ' ' + ey.toFixed(1));
+      path.setAttribute('marker-end', 'url(#arrow)');
+      g.appendChild(path);
+      if (e.label) {
+        var mx = (start.x + ex)/2, my = (start.y + ey)/2;
+        var lx = mx, ly = my - 10;
+        if (Math.abs(dx) < Math.abs(dy)) { lx = mx + (dx>=0?18:-18); ly = my + 4; }
+        var label = document.createElementNS(NS, 'text');
+        label.setAttribute('class', 'edge-label');
+        label.setAttribute('x', lx.toFixed(1));
+        label.setAttribute('y', ly.toFixed(1));
+        label.textContent = e.label;
+        g.appendChild(label);
+      }
+      edgeLayer.appendChild(g);
+    });
+
+    nodes.forEach(function(n) {
+      var g = document.createElementNS(NS, 'g');
+      g.setAttribute('class', 'node kind-' + n.kind);
+      g.setAttribute('id', 'node-' + n.id);
+      g.setAttribute('transform', 'translate(' + n.x + ', ' + n.y + ')');
+      var body = document.createElementNS(NS, 'g');
+      body.setAttribute('class', 'node-body');
+      var rect = document.createElementNS(NS, 'rect');
+      rect.setAttribute('x', -n.w/2);
+      rect.setAttribute('y', -n.h/2);
+      rect.setAttribute('width', n.w);
+      rect.setAttribute('height', n.h);
+      rect.setAttribute('rx', n.kind === 'root' ? 22 : 14);
+      body.appendChild(rect);
+      var icon = document.createElementNS(NS, 'text');
+      icon.setAttribute('class', 'node-icon');
+      icon.setAttribute('x', -n.w/2 + 24);
+      icon.setAttribute('y', 0);
+      icon.setAttribute('dy', '7');
+      icon.textContent = n.icon;
+      body.appendChild(icon);
+      var text = document.createElementNS(NS, 'text');
+      text.setAttribute('class', 'node-label');
+      var lines = String(n.label).split('\n');
+      var lh = 21;
+      var startDy = -((lines.length-1)*lh)/2 + 6;
+      lines.forEach(function(line, i) {
+        var ts = document.createElementNS(NS, 'tspan');
+        ts.setAttribute('x', 20);
+        ts.setAttribute('dy', i===0 ? startDy : lh);
+        ts.textContent = line;
+        text.appendChild(ts);
+      });
+      body.appendChild(text);
+      g.appendChild(body);
+      g.addEventListener('click', function(ev) {
+        ev.stopPropagation();
+        selectNode(n.id);
+        cfg.edges.forEach(function(e) {
+          if (e.from === n.id) reveal(e.to);
+        });
+      });
+      nodeLayer.appendChild(g);
+    });
+
+    state = {
+      nodes: byId,
+      edges: cfg.edges,
+      revealOrder: cfg.revealOrder,
+      revealed: {},
+      history: [],
+      view: { x: 0, y: 0, k: 1 },
+      selectedId: null
+    };
+    state.revealed['root'] = true;
+    state.history.push('root');
+
+    applyView();
+    updateDiagram();
+    selectNode('root');
+  }
+
+  function reveal(id) {
+    if (!state.nodes[id] || state.revealed[id]) return;
+    state.revealed[id] = true;
+    state.history.push(id);
+    updateDiagram();
+  }
+
+  function updateDiagram() {
+    var ids = Object.keys(state.nodes);
+    ids.forEach(function(id) {
+      var el = document.getElementById('node-' + id);
+      if (el) el.classList.toggle('visible', !!state.revealed[id]);
+    });
+    state.edges.forEach(function(e) {
+      var el = document.getElementById('edge-' + e.from + '-' + e.to);
+      if (el) el.style.opacity = (state.revealed[e.from] && state.revealed[e.to]) ? '1' : '0';
+    });
+    var count = Object.keys(state.revealed).length;
+    stepIndicator.textContent = count + ' / ' + ids.length;
+    btnPrev.disabled = state.history.length <= 1;
+    btnNext.disabled = count >= ids.length;
+    btnAll.disabled = count >= ids.length;
+  }
+
+  function selectNode(id) {
+    state.selectedId = id;
+    var sel = document.querySelectorAll('.node.selected');
+    for (var i = 0; i < sel.length; i++) sel[i].classList.remove('selected');
+    var el = document.getElementById('node-' + id);
+    if (el) el.classList.add('selected');
+    var n = state.nodes[id];
+    panelContent.innerHTML =
+      '<div class="panel-head"><span class="panel-icon">' + n.icon + '</span>' +
+      '<h2>' + n.label.replace(/\n/g, ' ') + '</h2></div>' +
+      '<div class="panel-body">' + n.details + '</div>';
+  }
+
+  function applyView() {
+    world.setAttribute('transform',
+      'translate(' + state.view.x.toFixed(1) + ',' + state.view.y.toFixed(1) + ') scale(' + state.view.k.toFixed(3) + ')');
+  }
+
+  function zoomAt(factor) {
+    var cx = 750, cy = 500;
+    var k2 = Math.min(3.5, Math.max(0.55, state.view.k * factor));
+    if (k2 === state.view.k) return;
+    state.view.x = cx - (k2/state.view.k)*(cx - state.view.x);
+    state.view.y = cy - (k2/state.view.k)*(cy - state.view.y);
+    state.view.k = k2;
+    applyView();
+  }
+
+  btnNext.addEventListener('click', function() {
+    for (var i = 0; i < state.revealOrder.length; i++) {
+      if (!state.revealed[state.revealOrder[i]]) { reveal(state.revealOrder[i]); return; }
+    }
+  });
+  btnPrev.addEventListener('click', function() {
+    if (state.history.length <= 1) return;
+    var id = state.history.pop();
+    delete state.revealed[id];
+    updateDiagram();
+  });
+  btnAll.addEventListener('click', function() {
+    state.revealOrder.forEach(function(id) { reveal(id); });
+  });
+  btnReset.addEventListener('click', function() {
+    state.revealed = {};
+    state.revealed['root'] = true;
+    state.history = ['root'];
+    state.view = { x: 0, y: 0, k: 1 };
+    applyView();
+    updateDiagram();
+    selectNode('root');
+  });
+  document.getElementById('zoom-in').addEventListener('click', function() { zoomAt(1.25); });
+  document.getElementById('zoom-out').addEventListener('click', function() { zoomAt(0.8); });
+  document.getElementById('zoom-fit').addEventListener('click', function() {
+    state.view = { x: 0, y: 0, k: 1 };
+    applyView();
+  });
+
+  var dragging = false, lastX = 0, lastY = 0;
+  svg.addEventListener('pointerdown', function(ev) {
+    if (ev.target.closest && ev.target.closest('.node')) return;
+    dragging = true; lastX = ev.clientX; lastY = ev.clientY;
+    try { svg.setPointerCapture(ev.pointerId); } catch(e) {}
+  });
+  svg.addEventListener('pointermove', function(ev) {
+    if (!dragging) return;
+    var rect = svg.getBoundingClientRect();
+    var ratio = Math.min(rect.width/1500, rect.height/1000) || 1;
+    state.view.x += (ev.clientX - lastX)/ratio;
+    state.view.y += (ev.clientY - lastY)/ratio;
+    lastX = ev.clientX; lastY = ev.clientY;
+    applyView();
+  });
+  function endDrag(ev) { dragging = false; try { svg.releasePointerCapture(ev.pointerId); } catch(e) {} }
+  svg.addEventListener('pointerup', endDrag);
+  svg.addEventListener('pointercancel', endDrag);
+
+  var tabBtns = document.querySelectorAll('.tab-btn');
+  for (var i = 0; i < tabBtns.length; i++) {
+    tabBtns[i].addEventListener('click', function() {
+      for (var j = 0; j < tabBtns.length; j++) tabBtns[j].classList.remove('active');
+      this.classList.add('active');
+      buildDiagram(this.getAttribute('data-key'));
+    });
+  }
+
+  buildDiagram('dianxin');
+})();
+
+</script>
 </body>
 </html>
