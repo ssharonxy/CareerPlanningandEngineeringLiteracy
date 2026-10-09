@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>校园食堂排队系统 · 系统边界识别与排队过程模拟</title>
+<style>
+:root{
+  --bg:#0b1220; --panel:#0f172a; --panel2:#111c33; --line:#1e293b;
+  --txt:#e2e8f0; --muted:#94a3b8; --accent:#38bdf8;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:var(--bg); color:var(--txt);
+  display:flex; flex-direction:column;
+  min-height:100vh; min-height:100dvh;
+  font-size:14px; line-height:1.5; overflow-x:hidden;
+}
+@media(min-width:768px){
+  body{flex-direction:row; height:100vh; height:100dvh; overflow:hidden}
+}
+
+/* ---------- 左侧控制面板 ---------- */
+#controls{
+  width:100%; flex:0 0 auto; display:flex; flex-direction:column;
+  background:var(--panel); border-bottom:1px solid var(--line);
+  max-height:48vh; z-index:30;
+}
+@media(min-width:768px){
+  #controls{width:372px; max-height:none; height:100%; border-bottom:none; border-right:1px solid var(--line)}
+}
+.panel-head{flex:0 0 auto; padding:10px 12px 11px; border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,#0b1220,#0f172a)}
+.panel-body{flex:1 1 auto; overflow-y:auto; padding:10px 12px 28px; -webkit-overflow-scrolling:touch}
+h1{font-size:15px;margin:0;font-weight:800;letter-spacing:.01em}
+h1 .en{font-size:9.5px;color:#64748b;font-weight:500;display:block;letter-spacing:.09em;text-transform:uppercase;margin-top:1px}
+.sub{margin:3px 0 9px;font-size:11px;color:var(--muted)}
+.btn{
+  border:1px solid var(--line); background:#1e293b; color:var(--txt);
+  border-radius:10px; padding:0 12px; height:44px; font-size:13px; font-weight:700;
+  cursor:pointer; touch-action:manipulation; transition:transform .12s, background .15s, border-color .15s;
+  font-family:inherit; display:inline-flex; align-items:center; justify-content:center; gap:5px;
+}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(180deg,#0ea5e9,#0284c7);border-color:#0284c7;color:#fff;
+  box-shadow:0 3px 14px rgba(14,165,233,.32)}
+.btn-primary[data-state="pause"]{background:linear-gradient(180deg,#f59e0b,#d97706);border-color:#d97706;
+  box-shadow:0 3px 14px rgba(245,158,11,.32)}
+.btn-primary[data-state="resume"]{background:linear-gradient(180deg,#10b981,#059669);border-color:#059669;
+  box-shadow:0 3px 14px rgba(16,185,129,.32)}
+.btn-primary[data-state="restart"]{background:linear-gradient(180deg,#8b5cf6,#7c3aed);border-color:#7c3aed;
+  box-shadow:0 3px 14px rgba(139,92,246,.38); animation:pulseBtn 1.8s infinite}
+@keyframes pulseBtn{0%,100%{box-shadow:0 3px 14px rgba(139,92,246,.35)}50%{box-shadow:0 3px 22px rgba(139,92,246,.75)}}
+.btn-row{display:flex;gap:8px;margin-top:8px}
+.btn-row .btn{flex:1}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;height:44px;flex:1}
+.seg-btn{flex:1;background:#111c33;border:none;color:var(--muted);font-size:12px;font-weight:800;
+  cursor:pointer;min-width:44px;font-family:inherit;transition:.15s}
+.seg-btn.active{background:#1d4ed8;color:#fff}
+
+.card{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:10px}
+.card h2{margin:0 0 8px;font-size:12px;font-weight:800;color:#cbd5e1;letter-spacing:.03em}
+.hint{font-size:11px;color:var(--muted);margin:0 0 8px;line-height:1.6}
+.hint b{color:#38bdf8}
+
+/* 滑块 */
+.ctl{margin-bottom:10px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;
+  color:#cbd5e1;margin-bottom:2px;gap:6px}
+.ctl .val{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--accent);font-weight:800;font-size:14px}
+.ctl .unit{font-size:10.5px;color:var(--muted);font-weight:500}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:44px;background:transparent;
+  cursor:pointer;touch-action:pan-y;margin:0;display:block;
+}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:#1e293b}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;
+  background:linear-gradient(180deg,#38bdf8,#0284c7);border:2px solid #0b1220;margin-top:-10px;
+  box-shadow:0 2px 10px rgba(56,189,248,.5)}
+input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:#1e293b}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#38bdf8;border:2px solid #0b1220}
+input[type=range]:focus{outline:none}
+input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px rgba(56,189,248,.35)}
+
+/* 预设 */
+.preset{display:block;width:100%;text-align:left;background:#0b1220;border:1px solid var(--line);
+  border-radius:10px;padding:8px 11px;margin-bottom:7px;color:var(--txt);cursor:pointer;
+  font-family:inherit;font-size:12.5px;min-height:44px;touch-action:manipulation;transition:.15s}
+.preset:last-child{margin-bottom:0}
+.preset:hover{border-color:#38bdf8;background:#0f1c31}
+.preset:active{transform:scale(.985)}
+.preset b{display:block;font-size:12.5px;color:#e2e8f0}
+.preset span{display:block;font-size:10.5px;color:var(--muted);margin-top:2px;line-height:1.45}
+
+/* 指标 */
+.kv{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;
+  border-bottom:1px dashed rgba(51,65,85,.55);font-size:12px;color:var(--muted)}
+.kv:last-child{border-bottom:none}
+.kv b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13.5px;color:#e2e8f0}
+.kv i{font-style:normal;font-size:10.5px;color:#64748b;margin-left:3px}
+#m-status.on{color:#34d399;font-weight:800}
+#m-status.over{color:#f87171;font-weight:800}
+#m-status.warn{color:#fbbf24;font-weight:800}
+
+/* 验收 */
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin:0 0 8px}
+.dchip{flex:1 1 0;min-width:50px;background:#0b1220;border:1px solid var(--line);border-radius:8px;
+  padding:5px 2px;text-align:center;font-size:9.5px;color:var(--muted);line-height:1.3}
+.dchip b{display:block;font-family:ui-monospace,monospace;font-size:12px;color:#e2e8f0;margin-bottom:1px}
+.dchip.ok{border-color:rgba(52,211,153,.6);background:rgba(52,211,153,.1)}
+.dchip.ok b{color:#34d399}
+.dchip.no{border-color:rgba(248,113,113,.6);background:rgba(248,113,113,.1)}
+.dchip.no b{color:#f87171}
+.verdict{border-radius:10px;padding:9px 11px;font-size:12.5px;font-weight:800;text-align:center;
+  background:#0b1220;border:1px solid var(--line);color:var(--muted);transition:.25s}
+.verdict.pass{background:rgba(52,211,153,.14);border-color:#34d399;color:#6ee7b7}
+.verdict.fail{background:rgba(248,113,113,.14);border-color:#f87171;color:#fca5a5}
+
+/* 五要素 */
+.legend{list-style:none;margin:0;padding:0;font-size:11.5px}
+.legend li{display:flex;gap:7px;align-items:flex-start;padding:5px 0;
+  border-bottom:1px dashed rgba(51,65,85,.5)}
+.legend li:last-child{border-bottom:none}
+.legend .dot{flex:0 0 auto;width:9px;height:9px;border-radius:50%;margin-top:4px}
+.legend .nm{font-weight:800;color:#e2e8f0;flex:0 0 auto;min-width:34px;font-size:11.5px}
+.legend .ds{color:var(--muted);font-size:10.5px;line-height:1.5}
+
+/* 约束 */
+.constraints{list-style:none;margin:0;padding:0;font-size:11.5px;color:var(--muted)}
+.constraints li{padding:3.5px 0 3.5px 14px;position:relative;line-height:1.5}
+.constraints li::before{content:"";position:absolute;left:2px;top:10px;width:5px;height:5px;
+  border-radius:1px;background:#475569}
+
+/* ---------- 舞台 ---------- */
+#stage{position:relative;flex:1 1 auto;min-height:320px;background:#0b1220;overflow:hidden}
+@media(min-width:768px){#stage{height:100%;min-height:0}}
+#canvas{display:block;width:100%;height:100%;touch-action:none}
+#hud{position:absolute;top:6px;left:6px;right:6px;display:flex;flex-wrap:wrap;gap:5px;
+  pointer-events:none;z-index:5}
+.chip{display:flex;align-items:baseline;gap:4px;background:rgba(15,23,42,.84);
+  border:1px solid rgba(51,65,85,.9);border-radius:8px;padding:3px 7px;font-size:10px;
+  color:var(--muted);backdrop-filter:blur(4px);white-space:nowrap}
+.chip .v{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
+  font-weight:800;color:#e2e8f0}
+.chip .v.hot{color:#f87171}
+.chip .v.warm{color:#fbbf24}
+
+#state-badge{position:absolute;top:6px;right:6px;z-index:6;font-size:10.5px;font-weight:800;
+  padding:3px 9px;border-radius:999px;border:1px solid var(--line);
+  background:rgba(15,23,42,.85);color:#94a3b8;pointer-events:none;transition:.2s}
+#state-badge.running{color:#34d399;border-color:rgba(52,211,153,.6);background:rgba(6,78,59,.6)}
+#state-badge.paused{color:#fbbf24;border-color:rgba(251,191,36,.6);background:rgba(120,53,15,.55)}
+#state-badge.ended{color:#a78bfa;border-color:rgba(167,139,250,.6);background:rgba(76,29,149,.5)}
+
+#result{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.92);
+  opacity:0;pointer-events:none;background:rgba(11,18,32,.97);border:1px solid #334155;
+  border-radius:14px;padding:14px 18px;text-align:center;z-index:20;transition:.32s cubic-bezier(.2,.9,.3,1.3);
+  max-width:90%;box-shadow:0 14px 44px rgba(0,0,0,.7)}
+#result.show{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:auto}
+#result .rt{font-size:14px;font-weight:800;margin-bottom:7px;color:#e2e8f0}
+#result .rb{font-size:12px;color:var(--muted);line-height:1.85}
+#result .rb b{font-family:ui-monospace,monospace;font-size:15px;color:#38bdf8}
+#result .rb .ok{color:#34d399;font-weight:800}
+#result .rb .no{color:#f87171;font-weight:800}
+
+@keyframes pulse-highlight{0%,100%{outline-color:rgba(139,92,246,.85)}50%{outline-color:rgba(139,92,246,.35)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.teacher-annotation{font-family:inherit}
+
+/* 滚动条 */
+.panel-body::-webkit-scrollbar{width:6px}
+.panel-body::-webkit-scrollbar-thumb{background:#334155;border-radius:3px}
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const katexOptions = {
+        delimiters: [
+            {left: '\\[', right: '\\]', display: true},
+            {left: '\\(', right: '\\)', display: false},
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+        ],
+        throwOnError: false,
+        strict: false,
+        trust: true
+    };
+
+    let renderTimeout;
+    function safeRender() {
+        if (renderTimeout) clearTimeout(renderTimeout);
+        renderTimeout = setTimeout(() => {
+            renderMathInElement(document.body, katexOptions);
+        }, 100);
+    }
+
+    renderMathInElement(document.body, katexOptions);
+
+    const observer = new MutationObserver((mutations) => {
+        let shouldRender = false;
+        mutations.forEach((mutation) => {
+            if (mutation.target &&
+                mutation.target.className &&
+                typeof mutation.target.className === 'string' &&
+                mutation.target.className.includes('katex')) {
+                return;
+            }
+            shouldRender = true;
+        });
+
+        if (shouldRender) {
+            safeRender();
+        }
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        characterData: true
+    });
+
+    setInterval(() => {
+        const text = document.body.innerText;
+        if (text.includes('\\(') || text.includes('$$')) {
+            safeRender();
+        }
+    }, 2000);
+});
+</script>
+</head>
+<body>
+
+<aside id="controls">
+  <div class="panel-head">
+    <h1>校园食堂排队系统
+      <span class="en">Campus Cafeteria Queue · System Boundary</span>
+    </h1>
+    <p class="sub">系统边界识别 · 排队过程模拟 · 验收口径演练</p>
+    <div class="btn-row">
+      <button id="main-btn" class="btn btn-primary" data-state="start" aria-label="启动或暂停模拟">启动模拟</button>
+      <button id="reset-btn" class="btn" aria-label="重置模拟">重置</button>
+    </div>
+    <div class="btn-row">
+      <button id="labels-btn" class="btn" aria-pressed="true" aria-label="切换系统要素标签层">要素标签：开</button>
+      <div class="seg" role="group" aria-label="模拟速度">
+        <button class="seg-btn" data-speed="1" aria-label="1倍速">1×</button>
+        <button class="seg-btn active" data-speed="2" aria-label="2倍速">2×</button>
+        <button class="seg-btn" data-speed="4" aria-label="4倍速">4×</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel-body">
+    <section class="card">
+      <h2>可调变量</h2>
+      <div id="sliders"></div>
+    </section>
+
+    <section class="card">
+      <h2>预设场景</h2>
+      <div id="presets"></div>
+    </section>
+
+    <section class="card">
+      <h2>实时指标</h2>
+      <div class="kv"><span>当前队列长度</span><b id="m-queue">0</b><i>人</i></div>
+      <div class="kv"><span>平均等待时间</span><b id="m-wait">0.0</b><i>分钟</i></div>
+      <div class="kv"><span>最长等待时间</span><b id="m-maxwait">0.0</b><i>分钟</i></div>
+      <div class="kv"><span>已服务人数</span><b id="m-served">0</b><i>人</i></div>
+      <div class="kv"><span>服务能力 μ·k</span><b id="m-cap">4.5</b><i>人/分</i></div>
+      <div class="kv"><span>系统负载 ρ</span><b id="m-rho">0.89</b></div>
+      <div class="kv"><span>系统状态</span><b id="m-status" class="on">稳定</b></div>
+    </section>
+
+    <section class="card">
+      <h2>验收：连续 5 个工作日</h2>
+      <p class="hint">达标口径：当日<b>平均等待时间 ≤ 阈值</b>（<span id="thr-note">3.0</span> 分钟）。
+        连续 5 个工作日中<b>≥ 4 天达标</b>即通过验收。点“重新开始”可改变随机种子重跑一次。</p>
+      <div id="day-chips" class="chips"></div>
+      <div id="verdict" class="verdict">—</div>
+    </section>
+
+    <section class="card" id="legend-card">
+      <h2>系统五要素对照</h2>
+      <ul class="legend">
+        <li><span class="dot" style="background:#38bdf8"></span><span class="nm">输入</span>
+          <span class="ds">就餐人流（人/分）、支付请求 —— 由下课时间与课表决定</span></li>
+        <li><span class="dot" style="background:#fb923c"></span><span class="nm">处理</span>
+          <span class="ds">点餐 — 备餐 — 结算，由「档口数量 × 单人服务时长」决定产能</span></li>
+        <li><span class="dot" style="background:#34d399"></span><span class="nm">输出</span>
+          <span class="ds">餐品与等待时间（队列长度、平均/最长等待）</span></li>
+        <li><span class="dot" style="background:#a78bfa"></span><span class="nm">反馈</span>
+          <span class="ds">等待时间过长 → 加档口 / 错峰下课 / 预制提速，再回到输入与处理</span></li>
+        <li><span class="dot" style="background:#2dd4bf"></span><span class="nm">环境</span>
+          <span class="ds">系统边界之外的约束：场地、预算、人力、法规、保鲜时限</span></li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>环境与约束（边界之外）</h2>
+      <ul class="constraints">
+        <li>场地座位数：约 180 座（食堂大厅物理边界）</li>
+        <li>午高峰时长：实测约 35 分钟（11:40–12:15）</li>
+        <li>食材保鲜时限：≤ 4 小时，不能提前无限备餐</li>
+        <li>人力与预算上限：档口 ≤ 8 个</li>
+        <li>食品安全法规：留样、温度记录、从业人员健康证</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>操作提示</h2>
+      <ul class="constraints">
+        <li>空格键 = 启动 / 暂停 / 继续</li>
+        <li>R 键 = 重置到初始状态</li>
+        <li>拖动滑块，观察平均等待时间如何<b style="color:#38bdf8">非线性</b>增长</li>
+      </ul>
+    </section>
+  </div>
+</aside>
+
+<main id="stage">
+  <canvas id="canvas" aria-label="食堂排队仿真画面"></canvas>
+
+  <div id="hud">
+    <div class="chip"><span>时间</span><span class="v" id="hud-time">0.0</span><span>/分</span></div>
+    <div class="chip"><span>队列</span><span class="v" id="hud-queue">0</span><span>人</span></div>
+    <div class="chip"><span>平均等待</span><span class="v" id="hud-wait">0.0</span><span>分</span></div>
+    <div class="chip"><span>已服务</span><span class="v" id="hud-served">0</span><span>人</span></div>
+    <div class="chip"><span>ρ</span><span class="v" id="hud-rho">0.00</span></div>
+  </div>
+
+  <div id="state-badge">待启动</div>
+
+  <div id="result">
+    <div class="rt">本日仿真结束</div>
+    <div class="rb" id="result-body"></div>
+  </div>
+</main>
+
+<script type="application/json" id="widget-config">
+{
+  "type": "simulation",
+  "concept": "queueing_system_boundary",
+  "description": "校园食堂午高峰排队系统：调节到达人流、档口数量与服务时长，观察队列长度与平均等待时间的变化，并用系统五要素（输入/处理/输出/反馈/环境边界）识别食堂系统的边界与约束。",
+  "variables": [
+    { "name": "arrival_rate_per_min", "label": "到达人流", "min": 1, "max": 15, "step": 0.5, "default": 4, "unit": "人/分钟" },
+    { "name": "service_stations", "label": "档口数量", "min": 1, "max": 8, "step": 1, "default": 3, "unit": "个" },
+    { "name": "avg_service_seconds", "label": "平均服务时长", "min": 15, "max": 120, "step": 5, "default": 40, "unit": "秒/人" },
+    { "name": "peak_duration_min", "label": "午高峰时长", "min": 10, "max": 60, "step": 5, "default": 35, "unit": "分钟" },
+    { "name": "target_wait_threshold", "label": "达标等待阈值", "min": 1, "max": 15, "step": 0.5, "default": 3, "unit": "分钟" }
+  ],
+  "presets": [
+    { "name": "① 午高峰基准", "variables": { "arrival_rate_per_min": 4, "service_stations": 3, "avg_service_seconds": 40, "peak_duration_min": 35, "target_wait_threshold": 3 } },
+    { "name": "② 人流翻倍（过载）", "variables": { "arrival_rate_per_min": 8, "service_stations": 3, "avg_service_seconds": 40, "peak_duration_min": 35, "target_wait_threshold": 3 } },
+    { "name": "③ 临时加开档口", "variables": { "arrival_rate_per_min": 8, "service_stations": 6, "avg_service_seconds": 40, "peak_duration_min": 35, "target_wait_threshold": 3 } },
+    { "name": "④ 预制菜提速", "variables": { "arrival_rate_per_min": 8, "service_stations": 4, "avg_service_seconds": 25, "peak_duration_min": 35, "target_wait_threshold": 3 } },
+    { "name": "⑤ 错峰下课", "variables": { "arrival_rate_per_min": 3, "service_stations": 3, "avg_service_seconds": 40, "peak_duration_min": 50, "target_wait_threshold": 3 } }
+  ]
+}
+</script>
+
+<script>
+/* ==================================================================
+   1. 基础工具
+================================================================== */
+const $ = id => document.getElementById(id);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+function roundRect(x, y, w, h, r) {
+  r = Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+function expTime(rate) {           // 指数分布：平均 1/rate（分钟）
+  return -Math.log(1 - Math.random()) / Math.max(0.0001, rate);
+}
+function mulberry32(a) {           // 可复现随机数（用于 5 日验收）
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+/* ==================================================================
+   2. 变量定义
+================================================================== */
+const VARS = [
+  { name: 'arrival_rate_per_min', label: '到达人流 λ', min: 1, max: 15, step: 0.5, def: 4, unit: '人/分钟', fmt: v => v.toFixed(1) },
+  { name: 'service_stations', label: '档口数量 k', min: 1, max: 8, step: 1, def: 3, unit: '个', fmt: v => String(Math.round(v)) },
+  { name: 'avg_service_seconds', label: '平均服务时长 s', min: 15, max: 120, step: 5, def: 40, unit: '秒/人', fmt: v => String(Math.round(v)) },
+  { name: 'peak_duration_min', label: '午高峰时长', min: 10, max: 60, step: 5, def: 35, unit: '分钟', fmt: v => String(Math.round(v)) },
+  { name: 'target_wait_threshold', label: '达标等待阈值', min: 1, max: 15, step: 0.5, def: 3, unit: '分钟', fmt: v => v.toFixed(1) }
+];
+
+const PRESETS = [
+  { name: '① 午高峰基准', tip: '4 人/分 · 3 档口 · 40 秒/人 —— 已接近饱和，等待时间开始非线性上涨',
+    vars: { arrival_rate_per_min: 4, service_stations: 3, avg_service_seconds: 40, peak_duration_min: 35, target_wait_threshold: 3 } },
+  { name: '② 人流翻倍（过载）', tip: '8 人/分 · 3 档口 —— ρ≈1.78，队列一路变长，永远排不完',
+    vars: { arrival_rate_per_min: 8, service_stations: 3, avg_service_seconds: 40, peak_duration_min: 35, target_wait_threshold: 3 } },
+  { name: '③ 临时加开档口', tip: '8 人/分 · 6 档口 —— 用空间换时间，但受场地与人力上限约束',
+    vars: { arrival_rate_per_min: 8, service_stations: 6, avg_service_seconds: 40, peak_duration_min: 35, target_wait_threshold: 3 } },
+  { name: '④ 预制菜提速', tip: '8 人/分 · 4 档口 · 服务 25 秒 —— 用流程优化换时间，档口不用加太多',
+    vars: { arrival_rate_per_min: 8, service_stations: 4, avg_service_seconds: 25, peak_duration_min: 35, target_wait_threshold: 3 } },
+  { name: '⑤ 错峰下课', tip: '3 人/分 · 高峰拉长到 50 分钟 —— 降低输入强度，系统轻松达标',
+    vars: { arrival_rate_per_min: 3, service_stations: 3, avg_service_seconds: 40, peak_duration_min: 50, target_wait_threshold: 3 } }
+];
+
+const P = {};
+VARS.forEach(v => P[v.name] = v.def);
+
+/* ==================================================================
+   3. 模拟状态
+================================================================== */
+const sim = {
+  running: false, paused: false, ended: false,
+  t: 0, speedMult: 2, baseRate: 0.4,        // 每真实秒推进 0.4·speedMult 模拟分钟
+  people: [], queue: [], stations: [],
+  waits: [], maxWait: 0, served: 0,
+  nextArrival: 0, seq: 0, lastTs: 0,
+  showLabels: true, seedBump: 0
+};
+
+/* ==================================================================
+   4. 画布与布局
+================================================================== */
+const canvas = $('canvas');
+const ctx = canvas.getContext('2d');
+const dpr = Math.min(window.devicePixelRatio || 1, 2);
+let W = 800, H = 520;
+let LAYOUT = null;
+
+function computeLayout() {
+  const stationW = clamp(W * 0.19, 64, 118);
+  const padR = 12;
+  const stationX = W - padR - stationW;
+  const queueRight = Math.max(stationX - 36, 120);
+  const queueLeft = 46;
+  const topY = H < 400 ? 84 : 96;
+  const bottomY = H - 48;
+
+  let rows = Math.floor((bottomY - topY) / 50);
+  rows = clamp(rows, 1, 5);
+  if (rows % 2 === 0) rows -= 1;           // 保证队尾落在左侧
+  rows = Math.max(1, rows);
+
+  const ys = [];
+  for (let r = 0; r < rows; r++) {
+    ys.push(rows === 1 ? (topY + bottomY) / 2 : topY + (bottomY - topY) * r / (rows - 1));
+  }
+
+  const spacing = 21;
+  const pts = [];
+  for (let r = 0; r < rows; r++) {
+    const y = ys[r];
+    const from = (r % 2 === 0) ? queueRight : queueLeft;
+    const to = (r % 2 === 0) ? queueLeft : queueRight;
+    const dist = Math.abs(to - from);
+    const n = Math.max(1, Math.round(dist / spacing));
+    for (let i = 0; i <= n; i++) {
+      pts.push({ x: from + (to - from) * i / n, y: y });
+    }
+  }
+
+  // 档口位置
+  const stations = [];
+  const k = Math.max(1, Math.round(P.service_stations));
+  const availTop = topY - 8, availBot = bottomY + 8;
+  const gap = (availBot - availTop) / k;
+  const hgt = clamp(gap - 8, 18, 56);
+  for (let i = 0; i < k; i++) {
+    stations.push({ x: stationX, y: availTop + gap * (i + 0.5), w: stationW, h: hgt });
+  }
+
+  LAYOUT = {
+    stationX, stationW, queueLeft, queueRight, topY, bottomY,
+    rows, ys, path: pts, stations, spacing,
+    entryX: 16,
+    entryY: ys[rows - 1]
+  };
+}
+
+let resizeRaf = 0;
+function resizeCanvas() {
+  const stage = $('stage');
+  const r = stage.getBoundingClientRect();
+  const w = Math.max(220, Math.floor(r.width));
+  const h = Math.max(240, Math.floor(r.height));
+  if (w === W && h === H && canvas.width) return;
+  W = w; H = h;
+  canvas.width = Math.floor(W * dpr);
+  canvas.height = Math.floor(H * dpr);
+  computeLayout();
+}
+if (window.ResizeObserver) {
+  new ResizeObserver(() => resizeCanvas()).observe($('stage'));
+}
+window.addEventListener('resize', resizeCanvas);
+window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 250));
+
+/* ==================================================================
+   5. 模拟核心
+================================================================== */
+function initStations() {
+  sim.stations = [];
+  const k = Math.max(1, Math.round(P.service_stations));
+  for (let i = 0; i < k; i++) sim.stations.push({ person: null, remaining: 0, total: 1 });
+}
+
+function syncStations() {
+  const k = Math.max(1, Math.round(P.service_stations));
+  while (sim.stations.length < k) sim.stations.push({ person: null, remaining: 0, total: 1 });
+  while (sim.stations.length > k) {
+    let idx = sim.stations.findIndex(s => !s.person);
+    if (idx === -1) idx = sim.stations.length - 1;
+    const st = sim.stations.splice(idx, 1)[0];
+    if (st.person) {                       // 正在服务的人退回队首
+      st.person.state = 'queue';
+      sim.queue.unshift(st.person);
+    }
+  }
+}
+
+function sampleService() {                 // 返回秒
+  const s = P.avg_service_seconds;
+  const v = -Math.log(1 - Math.random()) * s;
+  return Math.min(v, s * 3.2);
+}
+
+function spawnPerson(at) {
+  const p = {
+    id: ++sim.seq, arrivalTime: at, state: 'queue',
+    x: 0, y: 0, tx: 0, ty: 0, scale: 0.25, alpha: 0,
+    wait: 0, spawned: false, hidden: false
+  };
+  sim.people.push(p);
+  sim.queue.push(p);
+}
+
+function stepSim(dt) {
+  sim.t += dt;
+
+  // ---- 到达（输入）----
+  if (sim.t <= P.peak_duration_min) {
+    let guard = 0;
+    while (sim.nextArrival <= sim.t && guard++ < 400) {
+      spawnPerson(sim.nextArrival);
+      sim.nextArrival += expTime(P.arrival_rate_per_min);
+    }
+  } else {
+    sim.nextArrival = sim.t;               // 高峰结束后不再产生新到达
+  }
+
+  // ---- 服务推进（处理）----
+  for (const st of sim.stations) {
+    if (st.person) {
+      st.remaining -= dt * 60;
+      if (st.remaining <= 0) {
+        const p = st.person;
+        p.state = 'leave';
+        st.person = null;
+        sim.served++;
+      }
+    }
+  }
+
+  // ---- 派单：空闲档口接队首 ----
+  for (const st of sim.stations) {
+    if (!st.person && sim.queue.length) {
+      const p = sim.queue.shift();
+      p.state = 'serve';
+      p.wait = Math.max(0, sim.t - p.arrivalTime);
+      sim.waits.push(p.wait);
+      if (p.wait > sim.maxWait) sim.maxWait = p.wait;
+      st.person = p;
+      st.total = sampleService();
+      st.remaining = st.total;
+    }
+  }
+
+  // ---- 结束判定 ----
+  if (sim.t > P.peak_duration_min) {
+    const busy = sim.stations.some(s => s.person);
+    if ((!sim.queue.length && !busy) || sim.t > P.peak_duration_min + 150) {
+      endSim();
+    }
+  }
+}
+
+function avgWait() {
+  if (!sim.waits.length) return 0;
+  let s = 0;
+  for (let i = 0; i < sim.waits.length; i++) s += sim.waits[i];
+  return s / sim.waits.length;
+}
+
+/* ==================================================================
+   6. 状态机（启动 / 暂停 / 继续 / 重置）
+================================================================== */
+function updateButton() {
+  const b = $('main-btn');
+  if (sim.ended) { b.textContent = '重新开始'; b.dataset.state = 'restart'; }
+  else if (sim.running && sim.paused) { b.textContent = '继续'; b.dataset.state = 'resume'; }
+  else if (sim.running) { b.textContent = '暂停'; b.dataset.state = 'pause'; }
+  else { b.textContent = '启动模拟'; b.dataset.state = 'start'; }
+  updateBadge();
+}
+
+function updateBadge() {
+  const el = $('state-badge');
+  el.className = '';
+  if (sim.ended) { el.textContent = '本日已结束'; el.classList.add('ended'); }
+  else if (sim.running && sim.paused) { el.textContent = '已暂停'; el.classList.add('paused'); }
+  else if (sim.running) { el.textContent = '运行中'; el.classList.add('running'); }
+  else { el.textContent = sim.t > 0 ? '已暂停' : '待启动'; }
+}
+
+function handleMain() {
+  if (sim.ended) {                 // 结束状态 → 重置后重新开始
+    resetSim();
+    sim.running = true;
+    sim.paused = false;
+    updateButton();
+    return;
+  }
+  if (sim.running && !sim.paused) {         // 运行中 → 暂停
+    sim.paused = true;
+  } else {                                   // 待启动 / 已暂停 → 启动或继续
+    sim.running = true;
+    sim.paused = false;
+  }
+  updateButton();
+}
+
+function resetSim() {
+  sim.running = false;
+  sim.paused = false;
+  sim.ended = false;
+  sim.t = 0;
+  sim.people = [];
+  sim.queue = [];
+  sim.waits = [];
+  sim.maxWait = 0;
+  sim.served = 0;
+  sim.seq = 0;
+  sim.lastTs = 0;
+  sim.nextArrival = expTime(P.arrival_rate_per_min);
+  initStations();
+  hideResult();
+  updateButton();
+  updateMetrics();
+}
+
+function endSim() {
+  sim.running = false;
+  sim.paused = false;
+  sim.ended = true;
+  updateButton();
+  showResult();
+}
+
+function showResult() {
+  const aw = avgWait();
+  const ok = aw <= P.target_wait_threshold;
+  $('result-body').innerHTML =
+    `平均等待 <b>${aw.toFixed(1)}</b> 分 &nbsp;·&nbsp; 最长 <b>${sim.maxWait.toFixed(1)}</b> 分<br>` +
+    `共服务 <b>${sim.served}</b> 人 &nbsp;·&nbsp; 队列剩余 <b>${sim.queue.length}</b> 人<br>` +
+    `阈值 ${P.target_wait_threshold.toFixed(1)} 分 → ` +
+    (ok ? `<span class="ok">本日达标 ✓</span>` : `<span class="no">本日未达标 ✗</span>`);
+  $('result').classList.add('show');
+}
+function hideResult() { $('result').classList.remove('show'); }
+
+/* ==================================================================
+   7. 视觉更新
+================================================================== */
+function updateVisuals(dt) {
+  const path = LAYOUT.path;
+  const k = 1 - Math.exp(-10 * Math.min(dt, 0.12));
+  const stationPos = LAYOUT.stations;
+
+  const qIdx = new Map();
+  sim.queue.forEach((p, i) => qIdx.set(p.id, i));
+
+  for (const p of sim.people) {
+    let tx = p.tx, ty = p.ty;
+
+    if (p.state === 'queue') {
+      const i = qIdx.get(p.id) ?? 0;
+      if (i >= path.length) { p.hidden = true; continue; }
+      p.hidden = false;
+      tx = path[i].x;
+      ty = path[i].y;
+    } else if (p.state === 'serve') {
+      p.hidden = false;
+      const si = sim.stations.findIndex(s => s.person === p);
+      const sp = stationPos[si] || stationPos[0] || { x: W - 80, y: H / 2 };
+      tx = sp.x - 28;
+      ty = sp.y;
+    } else {                                   // leave
+      p.hidden = false;
+      tx = p.x + 260;
+      ty = p.y;
+      p.alpha -= dt * 1.1;
+    }
+
+    if (!p.spawned) { p.x = tx; p.y = ty; p.spawned = true; }
+    p.x += (tx - p.x) * k;
+    p.y += (ty - p.y) * k;
+    p.scale += (1 - p.scale) * k * 0.85;
+    if (p.state !== 'leave') p.alpha += (1 - p.alpha) * k * 0.85;
+  }
+
+  // 清理离场且淡出的人
+  sim.people = sim.people.filter(p => !(p.state === 'leave' && p.alpha <= 0.02));
+}
+
+/* ==================================================================
+   8. 绘制
+================================================================== */
+function draw() {
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#0b1220');
+  g.addColorStop(1, '#111c33');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+
+  drawCorridor();
+  drawStations();
+  drawPeople();
+  if (sim.showLabels) drawLabels();
+}
+
+function drawCorridor() {
+  const pts = LAYOUT.path;
+  if (!pts.length) return;
+  ctx.save();
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+  ctx.strokeStyle = 'rgba(56,189,248,0.07)';
+  ctx.lineWidth = 30;
+  ctx.stroke();
+
+  ctx.strokeStyle = 'rgba(56,189,248,0.20)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([6, 6]);
+  ctx.stroke();
+  ctx.restore();
+
+  // 入口箭头
+  const ey = LAYOUT.entryY;
+  ctx.save();
+  ctx.fillStyle = 'rgba(56,189,248,0.85)';
+  ctx.beginPath();
+  ctx.moveTo(4, ey - 7);
+  ctx.lineTo(14, ey);
+  ctx.lineTo(4, ey + 7);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawStations() {
+  LAYOUT.stations.forEach((s, i) => {
+    if (i >= sim.stations.length) return;
+    const st = sim.stations[i];
+    const busy = !!st.person;
+    const x = s.x, y = s.y - s.h / 2, w = s.w, h = s.h;
+
+    roundRect(x, y, w, h, 9);
+    ctx.fillStyle = busy ? 'rgba(251,146,60,0.18)' : 'rgba(30,41,59,0.85)';
+    ctx.fill();
+    ctx.lineWidth = 1.6;
+    ctx.strokeStyle = busy ? '#fb923c' : 'rgba(100,116,139,0.7)';
+    ctx.stroke();
+
+    ctx.fillStyle = busy ? '#fdba74' : '#94a3b8';
+    ctx.font = '700 11px ui-sans-serif, system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const labelY = (busy && h >= 40) ? y + h / 2 - 8 : s.y;
+    ctx.fillText('档口' + (i + 1), x + w / 2, labelY);
+
+    if (busy && h >= 40) {
+      const bw = w - 18, bx = x + 9, by = y + h - 10;
+      roundRect(bx, by, bw, 4, 2);
+      ctx.fillStyle = 'rgba(148,163,184,0.28)';
+      ctx.fill();
+      const frac = clamp(1 - st.remaining / Math.max(0.001, st.total), 0, 1);
+      roundRect(bx, by, Math.max(1.5, bw * frac), 4, 2);
+      ctx.fillStyle = '#fb923c';
+      ctx.fill();
+    }
+  });
+}
+
+function drawPeople() {
+  for (const p of sim.people) {
+    if (p.hidden || p.alpha <= 0.02) continue;
+    ctx.globalAlpha = clamp(p.alpha, 0, 1);
+    const r = 6.4 * Math.max(0.45, p.scale);
+
+    let col = '#38bdf8';
+    if (p.state === 'serve') col = '#fb923c';
+    else if (p.state === 'leave') col = '#475569';
+    else {
+      const w = sim.t - p.arrivalTime;
+      if (w > P.target_wait_threshold) col = '#f87171';
+      else if (w > P.target_wait_threshold * 0.55) col = '#fbbf24';
+    }
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+    ctx.fillStyle = col;
+    ctx.fill();
+    ctx.lineWidth = 1.4;
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+}
+
+function tagWidth(text) {
+  ctx.save();
+  ctx.font = '800 10.5px ui-sans-serif, system-ui, sans-serif';
+  const w = ctx.measureText(text).width + 15;
+  ctx.restore();
+  return w;
+}
+
+function drawTag(x, y, text, color) {
+  ctx.save();
+  ctx.font = '800 10.5px ui-sans-serif, system-ui, sans-serif';
+  const w = ctx.measureText(text).width + 15;
+  const h = 19;
+  roundRect(x, y - h / 2, w, h, 9.5);
+  ctx.fillStyle = 'rgba(11,18,32,0.92)';
+  ctx.fill();
+  ctx.lineWidth = 1.3;
+  ctx.strokeStyle = color;
+  ctx.stroke();
+  ctx.fillStyle = color;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, x + 7.5, y + 0.5);
+  ctx.restore();
+  return w;
+}
+
+function drawLabels() {
+  // 系统边界
+  ctx.save();
+  ctx.setLineDash([9, 7]);
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'rgba(45,212,191,0.6)';
+  roundRect(7, 7, W - 14, H - 14, 14);
+  ctx.stroke();
+  ctx.restore();
+
+  // 输入
+  const yIn = clamp(LAYOUT.entryY - 30, 48, H - 60);
+  drawTag(12, yIn, '输入：就餐人流 / 支付请求', '#38bdf8');
+
+  // 处理
+  const tProc = '处理：点餐—备餐—结算';
+  const wProc = tagWidth(tProc);
+  const yProc = Math.max(48, LAYOUT.topY - 32);
+  drawTag(Math.max(12, W - 12 - wProc), yProc, tProc, '#fb923c');
+
+  // 输出
+  const tOut = '输出：餐品 / 等待时间';
+  const wOut = tagWidth(tOut);
+  drawTag(Math.max(12, W - 12 - wOut), H - 22, tOut, '#34d399');
+
+  // 反馈
+  drawTag(12, H - 22, '反馈：等待久 → 加档口', '#a78bfa');
+
+  // 边界说明
+  ctx.save();
+  ctx.font = '700 10px ui-sans-serif, system-ui, sans-serif';
+  ctx.fillStyle = 'rgba(45,212,191,0.85)';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('系统边界：校园食堂（午高峰）', 14, 22);
+  ctx.restore();
+}
+
+/* ==================================================================
+   9. 指标与验收
+================================================================== */
+function currentRho() {
+  const k = Math.max(1, Math.round(P.service_stations));
+  return (P.arrival_rate_per_min * P.avg_service_seconds) / (60 * k);
+}
+
+function updateMetrics() {
+  const rho = currentRho();
+  const aw = avgWait();
+
+  $('hud-time').textContent = sim.t.toFixed(1);
+  const qEl = $('hud-queue');
+  qEl.textContent = sim.queue.length;
+  qEl.className = 'v' + (sim.queue.length > 25 ? ' hot' : sim.queue.length > 10 ? ' warm' : '');
+
+  const wEl = $('hud-wait');
+  wEl.textContent = aw.toFixed(1);
+  wEl.className = 'v' + (aw > P.target_wait_threshold ? ' hot' : aw > P.target_wait_threshold * 0.6 ? ' warm' : '');
+
+  $('hud-served').textContent = sim.served;
+  $('hud-rho').textContent = rho.toFixed(2);
+
+  $('m-queue').textContent = sim.queue.length;
+  $('m-wait').textContent = aw.toFixed(1);
+  $('m-maxwait').textContent = sim.maxWait.toFixed(1);
+  $('m-served').textContent = sim.served;
+  $('m-cap').textContent = (60 / P.avg_service_seconds * Math.round(P.service_stations)).toFixed(1);
+  $('m-rho').textContent = rho.toFixed(2);
+
+  const st = $('m-status');
+  st.className = '';
+  if (rho >= 1) { st.textContent = '过载（队列失控）'; st.className = 'over'; }
+  else if (rho >= 0.85) { st.textContent = '临界（等待骤增）'; st.className = 'warn'; }
+  else { st.textContent = '稳定'; st.className = 'on'; }
+}
+
+/* ---- 单日事件驱动仿真（无动画，用于 5 日验收）---- */
+function runDay(rng, lam, k, sSec, dur) {
+  const freeAt = new Array(k).fill(0);
+  const svcMeanMin = sSec / 60;
+  let t = 0, n = 0, sum = 0, maxW = 0, guard = 0;
+
+  while (true) {
+    t += -Math.log(1 - rng()) / lam;
+    if (t > dur) break;
+
+    let idx = 0;
+    for (let i = 1; i < k; i++) if (freeAt[i] < freeAt[idx]) idx = i;
+
+    const start = Math.max(t, freeAt[idx]);
+    const w = start - t;
+    sum += w; n++;
+    if (w > maxW) maxW = w;
+
+    let svc = -Math.log(1 - rng()) * svcMeanMin;
+    if (svc > svcMeanMin * 3.2) svc = svcMeanMin * 3.2;
+    freeAt[idx] = start + svc;
+
+    if (++guard > 30000) break;
+  }
+  return { n, avg: n ? sum / n : 0, max: maxW };
+}
+
+function validate() {
+  const lam = P.arrival_rate_per_min;
+  const k = Math.max(1, Math.round(P.service_stations));
+  const sSec = P.avg_service_seconds;
+  const dur = P.peak_duration_min;
+  const thr = P.target_wait_threshold;
+
+  const days = [];
+  for (let d = 0; d < 5; d++) {
+    const seed = (1 + d * 7919 + Math.round(lam * 37) * 131 + k * 1013 +
+                  Math.round(sSec) * 7 + Math.round(dur) * 3 + sim.seedBump * 977) >>> 0;
+    const rng = mulberry32(seed);
+    const r = runDay(rng, lam, k, sSec, dur);
+    days.push({ avg: r.avg, ok: r.avg <= thr });
+  }
+
+  const passDays = days.filter(d => d.ok).length;
+
+  $('day-chips').innerHTML = days.map((d, i) =>
+    `<div class="dchip ${d.ok ? 'ok' : 'no'}"><b>D${i + 1}</b>${d.avg.toFixed(1)}分<br>${d.ok ? '达标✓' : '超标✗'}</div>`
+  ).join('');
+
+  const v = $('verdict');
+  if (passDays >= 4) {
+    v.textContent = `达标 ${passDays}/5 天 → 通过验收 ✓`;
+    v.className = 'verdict pass';
+  } else {
+    v.textContent = `达标 ${passDays}/5 天 → 未通过验收 ✗`;
+    v.className = 'verdict fail';
+  }
+  $('thr-note').textContent = thr.toFixed(1);
+}
+
+/* ==================================================================
+   10. UI 构建
+================================================================== */
+function buildSliders() {
+  const box = $('sliders');
+  box.innerHTML = '';
+  VARS.forEach(v => {
+    const wrap = document.createElement('div');
+    wrap.className = 'ctl';
+    wrap.dataset.var = v.name;
+    wrap.innerHTML =
+      `<label for="${v.name}-slider">
+         <span>${v.label}</span>
+         <span><span class="val" id="${v.name}-display">${v.fmt(v.def)}</span>
+         <span class="unit">${v.unit}</span></span>
+       </label>
+       <input type="range" id="${v.name}-slider" data-var="${v.name}"
+              min="${v.min}" max="${v.max}" step="${v.step}" value="${v.def}"
+              aria-label="${v.label}（${v.unit}）">`;
+    box.appendChild(wrap);
+  });
+
+  VARS.forEach(v => {
+    const el = $(v.name + '-slider');
+    el.addEventListener('input', () => {
+      P[v.name] = parseFloat(el.value);
+      $(v.name + '-display').textContent = v.fmt(P[v.name]);
+      onParamChange(v.name);
+    });
+  });
+}
+
+function buildPresets() {
+  const box = $('presets');
+  box.innerHTML = '';
+  PRESETS.forEach((p, i) => {
+    const b = document.createElement('button');
+    b.className = 'preset';
+    b.id = 'preset-' + i + '-btn';
+    b.innerHTML = `<b>${p.name}</b><span>${p.tip}</span>`;
+    b.addEventListener('click', () => applyPreset(p.vars));
+    box.appendChild(b);
+  });
+}
+
+function applyPreset(vars) {
+  Object.keys(vars).forEach(name => {
+    P[name] = vars[name];
+    const el = $(name + '-slider');
+    if (el) {
+      el.value = vars[name];
+      const def = VARS.find(v => v.name === name);
+      if (def) $(name + '-display').textContent = def.fmt(vars[name]);
+    }
+  });
+  syncStations();
+  computeLayout();
+  resetSim();
+  validate();
+  updateMetrics();
+}
+
+function onParamChange(name) {
+  if (name === 'service_stations') {
+    syncStations();
+    computeLayout();
+  }
+  if (name === 'target_wait_threshold') {
+    $('thr-note').textContent = P.target_wait_threshold.toFixed(1);
+  }
+  let raf = 0;
+  validate();
+  updateMetrics();
+}
+
+/* ==================================================================
+   11. 主循环
+================================================================== */
+let metricTick = 0;
+function loop(ts) {
+  requestAnimationFrame(loop);
+  if (!sim.lastTs) sim.lastTs = ts;
+  let rdt = (ts - sim.lastTs) / 1000;
+  sim.lastTs = ts;
+  if (rdt > 0.1) rdt = 0.1;
+
+  if (sim.running && !sim.paused) {
+    stepSim(rdt * sim.baseRate * sim.speedMult);
+  }
+  updateVisuals(rdt);
+  draw();
+  if (++metricTick % 5 === 0) updateMetrics();
+}
+
+/* ==================================================================
+   12. 事件绑定
+================================================================== */
+$('main-btn').addEventListener('click', handleMain);
+$('reset-btn').addEventListener('click', () => {
+  sim.seedBump = (sim.seedBump + 1) % 97;
+  resetSim();
+  validate();
+});
+$('labels-btn').addEventListener('click', () => {
+  sim.showLabels = !sim.showLabels;
+  const b = $('labels-btn');
+  b.textContent = '要素标签：' + (sim.showLabels ? '开' : '关');
+  b.setAttribute('aria-pressed', String(sim.showLabels));
+  $('legend-card').style.opacity = sim.showLabels ? '1' : '0.45';
+});
+
+document.querySelectorAll('.seg-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.seg-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    sim.speedMult = parseInt(b.dataset.speed, 10);
+  });
+});
+
+window.addEventListener('keydown', e => {
+  const tag = (e.target && e.target.tagName) || '';
+  if (e.code === 'Space') {
+    e.preventDefault();
+    handleMain();
+  } else if ((e.key === 'r' || e.key === 'R') && tag !== 'INPUT') {
+    resetSim();
+    validate();
+  }
+});
+
+/* ==================================================================
+   13. 初始化
+================================================================== */
+function init() {
+  buildSliders();
+  buildPresets();
+  resizeCanvas();
+  resetSim();
+  validate();
+  updateMetrics();
+  requestAnimationFrame(loop);
+}
+init();
+
+/* ==================================================================
+   14. postMessage 监听（Widget 动作）
+================================================================== */
+window.addEventListener('message', function (event) {
+  const data = event.data || {};
+  const type = data.type;
+  const target = data.target;
+  const state = data.state;
+  const content = data.content;
+
+  switch (type) {
+    case 'SET_WIDGET_STATE':
+      if (state) {
+        Object.entries(state).forEach(([key, value]) => {
+          const slider = document.getElementById(key + '-slider') ||
+                         document.querySelector('[data-var="' + key + '"]');
+          if (slider) {
+            slider.value = value;
+            slider.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        });
+      }
+      break;
+
+    case 'HIGHLIGHT_ELEMENT': {
+      const highlightEl = document.querySelector(target);
+      if (highlightEl) {
+        highlightEl.style.outline = '3px solid rgba(139, 92, 246, 0.8)';
+        highlightEl.style.outlineOffset = '4px';
+        highlightEl.style.animation = 'pulse-highlight 2s infinite';
+        setTimeout(() => {
+          highlightEl.style.outline = '';
+          highlightEl.style.outlineOffset = '';
+          highlightEl.style.animation = '';
+        }, 3000);
+      }
+      break;
+    }
+
+    case 'ANNOTATE_ELEMENT': {
+      const annotateEl = document.querySelector(target);
+      if (annotateEl && content) {
+        const rect = annotateEl.getBoundingClientRect();
+        const tooltip = document.createElement('div');
+        tooltip.className = 'teacher-annotation';
+        tooltip.style.cssText =
+          'position:fixed; top:' + Math.max(8, rect.top - 44) + 'px; left:' + Math.max(8, rect.left) +
+          'px; background:rgba(139,92,246,0.95); color:white; padding:8px 12px; border-radius:8px; ' +
+          'font-size:13px; z-index:1000; animation:fadeIn 0.3s; max-width:80vw; box-shadow:0 8px 26px rgba(0,0,0,.5);';
+        tooltip.textContent = content;
+        document.body.appendChild(tooltip);
+        setTimeout(() => tooltip.remove(), 4000);
+      }
+      break;
+    }
+
+    case 'REVEAL_ELEMENT': {
+      const revealEl = document.querySelector(target);
+      if (revealEl) {
+        revealEl.style.display = '';
+        revealEl.style.opacity = '1';
+      }
+      break;
+    }
+
+    case 'RESET_SIMULATION':
+      resetSim();
+      validate();
+      break;
+
+    case 'START_SIMULATION':
+      if (!sim.running || sim.paused) handleMain();
+      break;
+
+    case 'PAUSE_SIMULATION':
+      if (sim.running && !sim.paused) handleMain();
+      break;
+  }
+});
+</script>
+</body>
+</html>

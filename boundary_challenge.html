@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>边界归位挑战 · 框内 / 框外 / 约束 / 利益相关方</title>
+<style>
+:root{
+  --cyan:#22d3ee; --green:#34d399; --amber:#fbbf24; --violet:#a78bfa;
+  --pink:#f472b6; --red:#f87171; --ink:#e6eefc;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;height:100%;}
+body{
+  font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+  background:radial-gradient(circle at 20% 0%,#152banother 0%,#070d18 70%);
+  background:radial-gradient(circle at 20% 0%,#16233d 0%,#070d18 65%);
+  color:var(--ink);overflow:hidden;
+}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;padding:8px;gap:8px;}
+
+/* ---------- header ---------- */
+header{
+  flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  padding:7px 12px;background:linear-gradient(180deg,#152340,#0d1730);
+  border:1px solid #24406b;border-radius:12px;
+}
+.brand{font-weight:800;font-size:15.5px;letter-spacing:.4px;white-space:nowrap;}
+.brand .sub{font-weight:500;font-size:11.5px;color:#8fb0d8;margin-left:8px;}
+.hud-right{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.stat{display:flex;flex-direction:column;align-items:center;background:#0b1730;border:1px solid #22395f;
+  border-radius:9px;padding:3px 9px;min-width:54px;}
+.stat .k{font-size:9.5px;color:#7f9dc4;line-height:1.4;}
+.stat b{font-size:14px;color:#7dd3fc;line-height:1.2;}
+.iconbtn{
+  width:38px;height:38px;border-radius:10px;border:1px solid #24406b;background:#0d1a31;color:#cfe4ff;
+  font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.iconbtn:active{transform:scale(.94);}
+
+/* ---------- board ---------- */
+#board{
+  position:relative;flex:1 1 auto;min-height:330px;border-radius:14px;overflow:hidden;
+  background-color:#08111f;
+  background-image:
+    linear-gradient(rgba(34,211,238,.055) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(34,211,238,.055) 1px,transparent 1px);
+  background-size:32px 32px,32px 32px;
+  border:1px solid #1c3355;box-shadow:inset 0 0 70px rgba(0,0,0,.65);
+  touch-action:none;
+}
+.panel{
+  position:absolute;border-radius:12px;z-index:2;
+  border:2px dashed rgba(251,191,36,.5);background:rgba(251,191,36,.06);
+  display:flex;align-items:flex-end;justify-content:center;
+}
+.panel.stakeholder{border-color:rgba(167,139,250,.5);background:rgba(167,139,250,.06);}
+.panel .ghost{font-size:10.5px;color:rgba(255,255,255,.32);padding-bottom:8px;text-align:center;
+  pointer-events:none;user-select:none;line-height:1.35;}
+.panel-label{
+  position:absolute;z-index:3;display:flex;align-items:center;justify-content:center;
+  font-size:11.5px;font-weight:700;letter-spacing:.3px;border-radius:8px;pointer-events:none;
+  background:rgba(251,191,36,.14);color:#fbbf24;border:1px solid rgba(251,191,36,.35);
+}
+.panel-label.violet{background:rgba(167,139,250,.14);color:#c4b5fd;border-color:rgba(167,139,250,.35);}
+#field-hint{
+  position:absolute;z-index:1;font-size:11px;color:rgba(244,114,182,.72);
+  pointer-events:none;user-select:none;letter-spacing:.3px;
+}
+
+/* ---------- boundary box ---------- */
+#boundary{
+  position:absolute;z-index:5;border:3px solid var(--cyan);border-radius:14px;
+  background:rgba(34,211,238,.05);
+  box-shadow:0 0 26px rgba(34,211,238,.32),inset 0 0 40px rgba(34,211,238,.07);
+  cursor:move;touch-action:none;
+}
+#boundary.ok{border-color:var(--green);background:rgba(52,211,153,.06);
+  box-shadow:0 0 30px rgba(52,211,153,.4),inset 0 0 40px rgba(52,211,153,.09);}
+.box-title{
+  position:absolute;top:5px;left:10px;font-size:11px;font-weight:700;color:rgba(125,211,252,.85);
+  pointer-events:none;user-select:none;letter-spacing:.3px;text-shadow:0 1px 4px #000;
+}
+#boundary.ok .box-title{color:rgba(110,231,183,.95);}
+.handle{
+  position:absolute;width:26px;height:26px;border-radius:8px;background:var(--cyan);
+  border:2px solid #08111f;z-index:26;touch-action:none;box-shadow:0 0 10px rgba(34,211,238,.7);
+}
+#boundary.ok .handle{background:var(--green);box-shadow:0 0 10px rgba(52,211,153,.7);}
+.handle.nw{left:-14px;top:-14px;cursor:nwse-resize;}
+.handle.ne{right:-14px;top:-14px;cursor:nesw-resize;}
+.handle.sw{left:-14px;bottom:-14px;cursor:nesw-resize;}
+.handle.se{right:-14px;bottom:-14px;cursor:nwse-resize;}
+.handle.n{left:calc(50% - 13px);top:-14px;cursor:ns-resize;}
+.handle.s{left:calc(50% - 13px);bottom:-14px;cursor:ns-resize;}
+.handle.w{left:-14px;top:calc(50% - 13px);cursor:ew-resize;}
+.handle.e{right:-14px;top:calc(50% - 13px);cursor:ew-resize;}
+
+/* ---------- cards ---------- */
+.card{
+  position:absolute;z-index:20;display:flex;align-items:center;justify-content:center;text-align:center;
+  padding:3px 5px;border-radius:9px;font-size:12px;font-weight:700;line-height:1.1;
+  background:linear-gradient(180deg,#eef6ff,#c6dbf7);color:#0b1a30;
+  border:2px solid #8fb6e6;box-shadow:0 3px 0 #5f80ad,0 5px 12px rgba(0,0,0,.4);
+  cursor:grab;touch-action:none;user-select:none;overflow:hidden;
+}
+.card::after{content:'';position:absolute;right:3px;top:3px;font-size:10px;color:#0f7a56;font-weight:900;}
+.card.solved{border-color:#34d399;box-shadow:0 0 0 2px rgba(52,211,153,.35),0 3px 0 #1a7a5a,0 5px 14px rgba(0,0,0,.4);}
+.card.solved::after{content:'✓';}
+.card.unplaced{border-style:dashed;opacity:.9;}
+.card.unplaced::after{content:'?';color:#8a6d1a;}
+.card.dragging{cursor:grabbing;transform:scale(1.07);z-index:60;box-shadow:0 12px 26px rgba(0,0,0,.55);}
+.card.snap{transition:left .26s cubic-bezier(.4,1.4,.5,1),top .26s cubic-bezier(.4,1.4,.5,1);}
+.card.wrong{animation:shake .45s;}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.card.flash{animation:flashCard .8s 2;}
+@keyframes flashCard{0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,0)}50%{box-shadow:0 0 0 6px rgba(248,113,113,.6)}}
+
+#fx{position:absolute;inset:0;z-index:40;pointer-events:none;}
+
+/* ---------- footer ---------- */
+footer{
+  flex:0 0 auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  padding:7px 10px;background:linear-gradient(180deg,#101c33,#0b1526);
+  border:1px solid #24406b;border-radius:12px;
+}
+.btn{
+  min-height:44px;padding:0 15px;border-radius:11px;border:1px solid #2f4d78;background:#12233d;
+  color:#d8e8ff;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;
+}
+.btn:active{transform:scale(.96);}
+.btn.primary{background:linear-gradient(180deg,#22d3ee,#0891b2);border-color:#67e8f9;color:#04222b;}
+.btn.big{min-height:52px;font-size:17px;padding:0 34px;}
+.status{display:flex;gap:12px;flex-wrap:wrap;margin-left:auto;font-size:12px;color:#9fb8d8;align-items:center;}
+.status b{color:#7dd3fc;}
+.status .ok{color:#34d399;}
+.status .bad{color:#f87171;}
+.status .warn{color:#fbbf24;}
+
+/* ---------- overlays ---------- */
+.overlay{
+  position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;
+  background:rgba(4,9,18,.82);backdrop-filter:blur(4px);padding:16px;overflow:auto;
+}
+.overlay.hidden{display:none;}
+.panel-card{
+  width:min(660px,94vw);background:linear-gradient(180deg,#13223c,#0b1526);
+  border:1px solid #2c4b79;border-radius:18px;padding:20px 22px;
+  box-shadow:0 24px 70px rgba(0,0,0,.7);animation:pop .28s ease;
+}
+@keyframes pop{from{transform:scale(.94);opacity:0}to{transform:scale(1);opacity:1}}
+.panel-card h1{margin:0 0 4px;font-size:23px;letter-spacing:.5px;}
+.panel-card .lead{margin:0 0 14px;color:#93b4dc;font-size:13px;}
+.rules{display:flex;flex-direction:column;gap:9px;margin:12px 0 18px;}
+.rule{display:flex;gap:10px;font-size:13.2px;line-height:1.55;color:#c7dbf3;
+  background:rgba(34,211,238,.06);border-left:3px solid #22d3ee;border-radius:0 9px 9px 0;padding:8px 11px;}
+.rule b{color:#7dd3fc;}
+.tag{display:inline-block;padding:1px 7px;border-radius:6px;font-weight:800;font-size:11.5px;}
+.tag.cyan{background:rgba(34,211,238,.2);color:#67e8f9;}
+.tag.pink{background:rgba(244,114,182,.2);color:#f9a8d4;}
+.tag.amber{background:rgba(251,191,36,.2);color:#fcd34d;}
+.tag.violet{background:rgba(167,139,250,.2);color:#c4b5fd;}
+.overlay-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px;}
+.score-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:9px;margin:14px 0;}
+.score-item{background:#0d1a31;border:1px solid #24406b;border-radius:11px;padding:9px 11px;text-align:center;}
+.score-item .k{font-size:11px;color:#7f9dc4;}
+.score-item .v{font-size:19px;font-weight:800;color:#7dd3fc;margin-top:2px;}
+.ach-line{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px;}
+.ach{display:flex;align-items:center;gap:5px;font-size:11.5px;padding:5px 10px;border-radius:20px;
+  background:#0d1a31;border:1px solid #24406b;color:#5f7ba0;}
+.ach.on{background:linear-gradient(90deg,rgba(76,29,149,.7),rgba(34,211,238,.18));
+  border-color:#7c3aed;color:#e0d5ff;box-shadow:0 0 14px rgba(124,58,237,.4);}
+
+/* ---------- toasts ---------- */
+#toasts{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:88px;width:min(560px,93vw);
+  display:flex;flex-direction:column;gap:8px;z-index:250;pointer-events:none;
+}
+.toast{
+  padding:10px 14px;border-radius:12px;font-size:13.2px;line-height:1.5;
+  background:rgba(13,24,44,.97);border-left:5px solid var(--cyan);
+  box-shadow:0 10px 30px rgba(0,0,0,.55);animation:slideUp .25s ease;
+}
+@keyframes slideUp{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
+.toast.good{border-color:var(--green);}
+.toast.bad{border-color:var(--red);}
+.toast.warn{border-color:var(--amber);}
+.toast.ach{border-color:var(--violet);background:linear-gradient(90deg,rgba(76,29,149,.95),rgba(13,24,44,.97));}
+.toast b{color:#7dd3fc;}
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const katexOptions = {
+        delimiters: [
+            {left: '\\[', right: '\\]', display: true},
+            {left: '\\(', right: '\\)', display: false},
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+        ],
+        throwOnError: false,
+        strict: false,
+        trust: true
+    };
+
+    let renderTimeout;
+    function safeRender() {
+        if (renderTimeout) clearTimeout(renderTimeout);
+        renderTimeout = setTimeout(() => {
+            renderMathInElement(document.body, katexOptions);
+        }, 100);
+    }
+
+    renderMathInElement(document.body, katexOptions);
+
+    const observer = new MutationObserver((mutations) => {
+        let shouldRender = false;
+        mutations.forEach((mutation) => {
+            if (mutation.target &&
+                mutation.target.className &&
+                typeof mutation.target.className === 'string' &&
+                mutation.target.className.includes('katex')) {
+                return;
+            }
+            shouldRender = true;
+        });
+
+        if (shouldRender) {
+            safeRender();
+        }
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        characterData: true
+    });
+
+    setInterval(() => {
+        const text = document.body.innerText;
+        if (text.includes('\\(') || text.includes('$$')) {
+            safeRender();
+        }
+    }, 2000);
+});
+</script>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="brand">🧩 边界归位挑战<span class="sub">框内 / 框外 / 约束 / 利益相关方</span></div>
+    <div class="hud-right">
+      <div class="stat"><span class="k">关卡</span><b id="hud-level">1/3</b></div>
+      <div class="stat"><span class="k">得分</span><b id="hud-score">0</b></div>
+      <div class="stat"><span class="k">归位</span><b id="hud-progress">0/12</b></div>
+      <div class="stat"><span class="k">时间</span><b id="hud-time">0:00</b></div>
+      <button class="iconbtn" id="mute-btn" onclick="toggleMute()" title="音效">🔊</button>
+      <button class="iconbtn" onclick="togglePause()" title="暂停">⏸</button>
+    </div>
+  </header>
+
+  <div id="board">
+    <div class="panel-label" id="label-constraint">约束区 · 限制条件</div>
+    <div class="panel-label violet" id="label-stakeholder">利益相关方区 · 有诉求的角色</div>
+    <div class="panel constraint" id="zone-constraint"><span class="ghost">把「限制条件」<br>拖到这里</span></div>
+    <div class="panel stakeholder" id="zone-stakeholder"><span class="ghost">把「利益相关方」<br>拖到这里</span></div>
+    <div id="field-hint">框外 = 环境 · 外部输入与反馈（把外部要素拖到这里放置）</div>
+    <div id="boundary">
+      <div class="box-title">框内 · 系统内部处理链条</div>
+      <div class="handle nw" data-h="nw"></div>
+      <div class="handle n"  data-h="n"></div>
+      <div class="handle ne" data-h="ne"></div>
+      <div class="handle w"  data-h="w"></div>
+      <div class="handle e"  data-h="e"></div>
+      <div class="handle sw" data-h="sw"></div>
+      <div class="handle s"  data-h="s"></div>
+      <div class="handle se" data-h="se"></div>
+    </div>
+    <canvas id="fx"></canvas>
+  </div>
+
+  <footer>
+    <button class="btn primary" onclick="checkBoundary()">🔍 检测边界</button>
+    <button class="btn" onclick="hintCard()">💡 提示</button>
+    <button class="btn" onclick="resetLevel()">↺ 重置本关</button>
+    <div class="status" id="status-bar">
+      <span>框内完整包含 <b id="st-inside">0/0</b></span>
+      <span>混入外部 <b id="st-intrude">0</b></span>
+      <span>紧凑度 <b id="st-compact">0%</b></span>
+      <span id="st-closed" class="warn">边界未闭合</span>
+    </div>
+  </footer>
+</div>
+
+<div id="toasts"></div>
+
+<div id="overlay-start" class="overlay">
+  <div class="panel-card">
+    <h1>🧩 边界归位挑战</h1>
+    <p class="lead">系统思维 · 划清「框内 / 框外 / 约束 / 利益相关方」——拖动卡片，也拖动边界。</p>
+    <div class="rules">
+      <div class="rule"><b>1</b> 把卡片拖到它该去的地方：<span class="tag cyan">框内</span> 系统内部处理链条 · <span class="tag pink">框外</span> 环境与外部输入 · <span class="tag amber">约束区</span> 限制条件 · <span class="tag violet">利益相关方区</span> 有诉求的角色。所有卡片都要亲手拖一次。</div>
+      <div class="rule"><b>2</b> 拖错会立刻被纠正：卡片弹回原处，并弹出「为什么它不属于那里」的解释。</div>
+      <div class="rule"><b>3</b> 拖动蓝色边框的 <b>8 个手柄</b> 收放「系统边界」，让它 <b>刚好包住内部要素</b>、不多装一件外部要素。边框也可以整体拖动。</div>
+      <div class="rule"><b>4</b> 四类要素全部归位 + 边界闭合 = 过关。用时越短、边界越紧凑，得分越高。</div>
+    </div>
+    <div class="overlay-actions">
+      <button class="btn primary big" onclick="startGame()">开始游戏</button>
+      <button class="btn big" onclick="showHelp()">玩法说明</button>
+    </div>
+    <div class="ach-line" id="start-ach"></div>
+  </div>
+</div>
+
+<div id="overlay-level" class="overlay hidden">
+  <div class="panel-card" id="level-card"></div>
+</div>
+
+<div id="overlay-help" class="overlay hidden">
+  <div class="panel-card">
+    <h1>📖 怎么玩</h1>
+    <div class="rules">
+      <div class="rule"><b>拖动卡片</b>：按住卡片拖到目标区域松开。拖对了卡片变绿并打 ✓；拖错了会弹回并解释原因。</div>
+      <div class="rule"><b>收放边界</b>：拖动蓝色边框上的 8 个手柄改变边界大小，拖动边框内部可以整体移动它。</div>
+      <div class="rule"><b>实时检测</b>：底部状态栏会实时告诉你——框内要素是否被完整包含、有没有把外部要素框进来、边界够不够紧凑。</div>
+      <div class="rule"><b>过关条件</b>：① 12 张卡片全部正确归位；② 边界刚好只包住「框内」要素（完整包含 + 无混入 + 紧凑度达标）。</div>
+      <div class="rule"><b>得分</b>：每张卡片正确归位 +10；边界闭合 +20；速度奖励最多 +60（越快越高）。</div>
+    </div>
+    <div class="overlay-actions">
+      <button class="btn primary big" onclick="hideHelp()">明白了</button>
+    </div>
+  </div>
+</div>
+
+<div id="overlay-pause" class="overlay hidden">
+  <div class="panel-card" style="text-align:center;">
+    <h1>⏸ 已暂停</h1>
+    <p class="lead">慢慢想，系统边界不是背出来的，是划出来的。</p>
+    <div class="overlay-actions">
+      <button class="btn primary big" onclick="togglePause()">继续游戏</button>
+      <button class="btn big" onclick="resetLevel()">重置本关</button>
+    </div>
+  </div>
+</div>
+
+<script type="application/json" id="widget-config">
+{
+  "type": "game",
+  "gameType": "puzzle",
+  "description": "拖拽要素卡片到四个区域，并可用手指收放系统边界框，实时检测边界是否闭合、是否有误画要素。",
+  "gameConfig": {
+    "controls": ["drag_cards", "resize_boundary_box", "check_button", "hint_button"],
+    "zones": ["inside", "env", "constraint", "stakeholder"],
+    "successCondition": "all cards placed correctly AND boundary closed (containment + no intrusion + compactness)",
+    "levels": 3
+  },
+  "scoring": { "correctPoints": 10, "boundaryBonus": 20, "speedBonus": 5 },
+  "achievements": [
+    { "id": "first_try", "name": "一击必中", "description": "一关内没有任何一次错误拖放", "icon": "🎯" },
+    { "id": "tight", "name": "贴合大师", "description": "边界紧凑度达到 65% 以上", "icon": "🦋" },
+    { "id": "speed", "name": "闪电归位", "description": "90 秒内完成一关", "icon": "⏱️" },
+    { "id": "solo", "name": "独立完成", "description": "不使用提示完成一关", "icon": "🧠" },
+    { "id": "all", "name": "全境通关", "description": "完成全部关卡", "icon": "🏆" },
+    { "id": "high", "name": "高分王者", "description": "累计得分达到 600", "icon": "🥇" }
+  ]
+}
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+'use strict';
+
+/* ========================================================
+   数据
+   ======================================================== */
+const CAT_INFO = {
+  inside:      { label:'框内（系统内部处理链条）', short:'框内',   color:'#22d3ee' },
+  env:         { label:'框外（环境与外部输入）',   short:'框外',   color:'#f472b6' },
+  constraint:  { label:'约束区（限制条件）',       short:'约束区', color:'#fbbf24' },
+  stakeholder: { label:'利益相关方区',             short:'利益相关方区', color:'#a78bfa' }
+};
+
+const LEVELS = [
+  {
+    name:'第 1 关 · 食堂午餐系统',
+    parTime:130, compactTarget:0.40,
+    cards:[
+      {text:'就餐人流',     cat:'inside',      hint:'它是系统要处理的核心流程输入，必须被划进边界。'},
+      {text:'菜单信息',     cat:'inside',      hint:'它是系统内部产生并维护的信息流。'},
+      {text:'支付请求',     cat:'inside',      hint:'它是内部处理链条的一环：下单 → 计价 → 支付。'},
+      {text:'学生投诉',     cat:'env',         hint:'它是环境给系统的反馈输入。系统内部要做的是"接收 → 分派 → 整改 → 回复"，投诉本身在框外。'},
+      {text:'天气',         cat:'env',         hint:'它是外部环境条件，系统控制不了，只能把它当输入来应对（比如雨天多备货）。'},
+      {text:'校园卡系统',   cat:'env',         hint:'它是外部系统/接口，食堂只是调用它，它不属于食堂自己的处理链条。'},
+      {text:'场地面积',     cat:'constraint',  hint:'它是外部施加的限制条件，规定了系统"能怎么做"。'},
+      {text:'保鲜时限',     cat:'constraint',  hint:'它是硬约束，限定了备餐与库存策略的可行范围。'},
+      {text:'食品安全法规', cat:'constraint',  hint:'它是必须遵守的外部规则，不在你的处理链条里。'},
+      {text:'学生',         cat:'stakeholder', hint:'他们是有诉求、会反馈的角色，不是"环境"，也不是内部环节。'},
+      {text:'档口员工',     cat:'stakeholder', hint:'他们是系统里干活的人，但在边界分析里算利益相关方。'},
+      {text:'后勤',         cat:'stakeholder', hint:'他们是学校侧的利益相关方，负责资源与协调。'}
+    ]
+  },
+  {
+    name:'第 2 关 · 图书馆借阅系统',
+    parTime:120, compactTarget:0.44,
+    cards:[
+      {text:'借书请求',     cat:'inside',      hint:'它是系统要处理的核心流程输入，必须被划进边界。'},
+      {text:'书目检索',     cat:'inside',      hint:'它是系统内部的信息处理环节。'},
+      {text:'逾期计算',     cat:'inside',      hint:'它是内部规则计算，属于借阅流程的一环。'},
+      {text:'读者投诉',     cat:'env',         hint:'它是环境反馈输入；内部要做的是"受理 → 处理 → 回复"。'},
+      {text:'天气（雨天到馆人数）', cat:'env', hint:'它是外部环境条件，直接影响人流，但系统控制不了。'},
+      {text:'校园一卡通系统', cat:'env',       hint:'它是外部系统/接口，图书馆只是调用它验证身份。'},
+      {text:'馆藏空间',     cat:'constraint',  hint:'它限定了系统"能装多少"，是外部施加的约束。'},
+      {text:'开放时间',     cat:'constraint',  hint:'它规定了服务的可行窗口，是硬约束。'},
+      {text:'借阅规则',     cat:'constraint',  hint:'它限定了可行的借还策略，是外部规则。'},
+      {text:'学生',         cat:'stakeholder', hint:'他们是有诉求的角色，不是"环境"。'},
+      {text:'图书馆员',     cat:'stakeholder', hint:'他们是系统里的人，但在边界分析中是利益相关方。'},
+      {text:'教务处',       cat:'stakeholder', hint:'它是学校侧的利益相关方，掌握资源与政策。'}
+    ]
+  },
+  {
+    name:'第 3 关 · 校园快递驿站',
+    parTime:110, compactTarget:0.48,
+    cards:[
+      {text:'取件码核验',   cat:'inside',      hint:'它是系统内部的处理环节，必须被划进边界。'},
+      {text:'包裹上架',     cat:'inside',      hint:'它是内部作业流程的一环。'},
+      {text:'出库扫码',     cat:'inside',      hint:'它是内部流程的收尾环节。'},
+      {text:'投诉与差评',   cat:'env',         hint:'它是环境反馈输入，系统要响应它，但它本身在框外。'},
+      {text:'电商大促',     cat:'env',         hint:'它是外部环境变化（件量暴增），系统只能提前应对。'},
+      {text:'快递干线系统', cat:'env',         hint:'它是外部系统，驿站只是对接它，不属于驿站内部流程。'},
+      {text:'驿站面积',     cat:'constraint',  hint:'它限定了能存多少件，是外部限制条件。'},
+      {text:'存放时限',     cat:'constraint',  hint:'它限定了包裹能放多久，是硬约束。'},
+      {text:'快递服务规范', cat:'constraint',  hint:'它是必须遵守的外部规范，不在你的处理链条里。'},
+      {text:'取件学生',     cat:'stakeholder', hint:'他们是有诉求、会反馈的角色，不是"环境"。'},
+      {text:'驿站兼职员工', cat:'stakeholder', hint:'他们是干活的人，但在边界分析里是利益相关方。'},
+      {text:'快递公司',     cat:'stakeholder', hint:'它是合作方，有自己的诉求，属于利益相关方。'}
+    ]
+  }
+];
+
+const ACHS = [
+  {id:'first_try', icon:'🎯', name:'一击必中',   desc:'一关内零错误拖放'},
+  {id:'tight',     icon:'🦋', name:'贴合大师',   desc:'紧凑度 ≥ 65%'},
+  {id:'speed',     icon:'⏱️', name:'闪电归位',   desc:'90 秒内完成一关'},
+  {id:'solo',      icon:'🧠', name:'独立完成',   desc:'不使用提示完成一关'},
+  {id:'all',       icon:'🏆', name:'全境通关',   desc:'完成全部三关'},
+  {id:'high',      icon:'🥇', name:'高分王者',   desc:'累计得分 ≥ 600'}
+];
+
+/* ========================================================
+   DOM
+   ======================================================== */
+const board      = document.getElementById('board');
+const fxCanvas   = document.getElementById('fx');
+const fxc        = fxCanvas.getContext('2d');
+const elConstraint = document.getElementById('zone-constraint');
+const elStake      = document.getElementById('zone-stakeholder');
+const labelC       = document.getElementById('label-constraint');
+const labelS       = document.getElementById('label-stakeholder');
+const fieldHint    = document.getElementById('field-hint');
+const elBoundary   = document.getElementById('boundary');
+const elToasts     = document.getElementById('toasts');
+
+/* ========================================================
+   状态
+   ======================================================== */
+let W = 0, H = 0;
+let L = { field:{x:0,y:0,w:0,h:0}, constraint:{x:0,y:0,w:0,h:0}, stakeholder:{x:0,y:0,w:0,h:0} };
+let box = {x:0,y:0,w:0,h:0};
+let cards = [];
+let cardW = 88, cardH = 40;
+let MINW = 150, MINH = 110;
+let parts = [];
+let fxW = 0, fxH = 0;
+const DPR = Math.min(2, window.devicePixelRatio || 1);
+
+const state = {
+  running:false, paused:false, levelIndex:0,
+  score:0, levelBase:0,
+  elapsed:0, wrongDrops:0, hintsUsed:0,
+  boundaryOK:false, boundaryAwarded:false, levelDone:false,
+  completeHintShown:false, dragging:null,
+  soundOn:true, lastCompact:0
+};
+
+/* ========================================================
+   工具
+   ======================================================== */
+const clamp = (v,a,b)=> Math.max(a, Math.min(b, v));
+function rectInside(outer, r){
+  return r.x >= outer.x-0.5 && r.y >= outer.y-0.5 &&
+         r.x+r.w <= outer.x+outer.w+0.5 && r.y+r.h <= outer.y+outer.h+0.5;
+}
+function rectContains(r, px, py){
+  return px>=r.x && px<=r.x+r.w && py>=r.y && py<=r.y+r.h;
+}
+function rectOverlap(a,b,m){
+  m = m||0;
+  return a.x < b.x+b.w+m && a.x+a.w+m > b.x && a.y < b.y+b.h+m && a.y+a.h+m > b.y;
+}
+
+/* ========================================================
+   布局
+   ======================================================== */
+function computeLayout(){
+  W = Math.max(300, board.clientWidth);
+  H = Math.max(300, board.clientHeight);
+  const narrow = W < 700;
+  if(!narrow){
+    const gap = Math.max(9, W*0.013);
+    const pw  = Math.max(112, Math.min(180, W*0.17));
+    const top = 30, bot = 10;
+    L.constraint  = {x:gap, y:top, w:pw, h:H-top-bot};
+    L.stakeholder = {x:W-gap-pw, y:top, w:pw, h:H-top-bot};
+    L.field = {x: gap*2+pw+gap, y:top, w: W - 2*(pw + gap*3), h:H-top-bot};
+    cardW = 88; cardH = 40;
+    MINW = Math.min(160, L.field.w*0.42);
+    MINH = Math.min(120, L.field.h*0.32);
+  } else {
+    const pad = 6, gap = 8;
+    const fh  = Math.round(H*0.56);
+    L.field = {x:pad, y:24, w:W-pad*2, h:Math.max(120, fh-24)};
+    const panelY = fh + 26;
+    const ph = Math.max(56, H - panelY - 8);
+    const pw = (W - pad*2 - gap)/2;
+    L.constraint  = {x:pad, y:panelY, w:pw, h:ph};
+    L.stakeholder = {x:pad+pw+gap, y:panelY, w:pw, h:ph};
+    cardW = 76; cardH = 36;
+    MINW = Math.min(130, L.field.w*0.45);
+    MINH = Math.min(100, L.field.h*0.38);
+  }
+  if(L.field.w < 60) L.field.w = 60;
+}
+
+function applyLayout(){
+  const pos = r => `left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px;`;
+  elConstraint.style.cssText = pos(L.constraint);
+  elStake.style.cssText      = pos(L.stakeholder);
+  labelC.style.cssText = pos({x:L.constraint.x, y:L.constraint.y-22, w:L.constraint.w, h:20});
+  labelS.style.cssText = pos({x:L.stakeholder.x, y:L.stakeholder.y-22, w:L.stakeholder.w, h:20});
+  fieldHint.style.left = (L.field.x+8)+'px';
+  fieldHint.style.top  = (L.field.y+5)+'px';
+  fieldHint.style.maxWidth = (L.field.w-16)+'px';
+  elBoundary.style.width = (L.field.w*0.30)+'px'; /* 防止 0 尺寸闪烁 */
+}
+
+function applyBox(){
+  elBoundary.style.left   = box.x+'px';
+  elBoundary.style.top    = box.y+'px';
+  elBoundary.style.width  = box.w+'px';
+  elBoundary.style.height = box.h+'px';
+}
+
+function centerBox(){
+  const w = clamp(L.field.w*0.42, MINW, L.field.w*0.7);
+  const h = clamp(L.field.h*0.40, MINH, L.field.h*0.7);
+  box = {
+    x: L.field.x + (L.field.w-w)/2,
+    y: L.field.y + (L.field.h-h)/2,
+    w: w, h: h
+  };
+  applyBox();
+}
+
+/* ========================================================
+   粒子特效
+   ======================================================== */
+function resizeFX(){
+  const r = board.getBoundingClientRect();
+  fxW = r.width; fxH = r.height;
+  fxCanvas.width  = Math.round(fxW*DPR);
+  fxCanvas.height = Math.round(fxH*DPR);
+  fxCanvas.style.width  = fxW+'px';
+  fxCanvas.style.height = fxH+'px';
+  fxc.setTransform(DPR,0,0,DPR,0,0);
+}
+function burst(x, y, color, n){
+  n = n || 18;
+  for(let i=0;i<n;i++){
+    const a = Math.random()*Math.PI*2;
+    const s = 1 + Math.random()*3.6;
+    parts.push({x, y, vx:Math.cos(a)*s, vy:Math.sin(a)*s-1.4,
+      life:1, color, r:2+Math.random()*3});
+  }
+}
+function stepParticles(dt){
+  fxc.clearRect(0,0,fxW,fxH);
+  if(!parts.length) return;
+  const k = dt/16.67;
+  for(let i=parts.length-1;i>=0;i--){
+    const p = parts[i];
+    p.x += p.vx*k; p.y += p.vy*k; p.vy += 0.13*k;
+    p.life -= dt/950;
+    if(p.life <= 0){ parts.splice(i,1); continue; }
+    fxc.globalAlpha = Math.max(0, p.life);
+    fxc.fillStyle = p.color;
+    fxc.beginPath();
+    fxc.arc(p.x, p.y, Math.max(0.5, p.r*p.life), 0, Math.PI*2);
+    fxc.fill();
+  }
+  fxc.globalAlpha = 1;
+}
+
+/* ========================================================
+   音效
+   ======================================================== */
+let actx = null;
+function initAudio(){
+  if(actx) return;
+  try{ actx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){}
+}
+function beep(freq, dur, type, vol, delay){
+  if(!state.soundOn) return;
+  initAudio();
+  if(!actx) return;
+  const t0 = actx.currentTime + (delay||0);
+  const o = actx.createOscillator();
+  const g = actx.createGain();
+  o.type = type || 'sine';
+  o.frequency.setValueAtTime(freq, t0);
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(vol||0.07, t0+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+  o.connect(g); g.connect(actx.destination);
+  o.start(t0); o.stop(t0+dur+0.03);
+}
+const sfxGood  = ()=>{ beep(660,0.09,'sine',0.07,0); beep(990,0.13,'sine',0.06,0.08); };
+const sfxBad   = ()=>{ beep(150,0.20,'square',0.05,0); beep(110,0.16,'square',0.04,0.12); };
+const sfxWarn  = ()=>{ beep(330,0.11,'triangle',0.05,0); };
+const sfxWin   = ()=>{ [523,659,784,1047].forEach((f,i)=>beep(f,0.13,'triangle',0.06,i*0.09)); };
+const sfxAch   = ()=>{ [659,880,1175].forEach((f,i)=>beep(f,0.16,'sine',0.07,i*0.11)); };
+
+/* ========================================================
+   提示气泡
+   ======================================================== */
+function toast(msg, kind, ms){
+  const el = document.createElement('div');
+  el.className = 'toast ' + (kind||'');
+  el.innerHTML = msg;
+  elToasts.appendChild(el);
+  while(elToasts.children.length > 3) elToasts.removeChild(elToasts.firstChild);
+  setTimeout(()=>{
+    el.style.transition = 'opacity .3s, transform .3s';
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(10px)';
+    setTimeout(()=>el.remove(), 320);
+  }, ms || 3600);
+}
+
+/* ========================================================
+   关卡加载
+   ======================================================== */
+function loadLevel(idx){
+  state.levelIndex = idx;
+  state.wrongDrops = 0;
+  state.hintsUsed = 0;
+  state.boundaryOK = false;
+  state.boundaryAwarded = false;
+  state.levelDone = false;
+  state.completeHintShown = false;
+  state.elapsed = 0;
+  state.levelBase = state.score;
+  state.dragging = null;
+
+  computeLayout();
+  applyLayout();
+  resizeFX();
+  centerBox();
+  buildCards(LEVELS[idx]);
+
+  updateHUD();
+  updateStatusUI();
+}
+
+function buildCards(level){
+  cards.forEach(c => c.el.remove());
+  cards = [];
+  const pos = scatterCards(level.cards.length, cardW, cardH);
+  level.cards.forEach((d, i)=>{
+    const el = document.createElement('div');
+    el.className = 'card unplaced';
+    el.textContent = d.text;
+    el.style.width  = cardW+'px';
+    el.style.height = cardH+'px';
+    el.style.left   = pos[i].x+'px';
+    el.style.top    = pos[i].y+'px';
+    board.appendChild(el);
+    const c = {
+      text:d.text, cat:d.cat, hint:d.hint, el,
+      x:pos[i].x, y:pos[i].y, w:cardW, h:cardH,
+      solved:false, awarded:false, placed:false, lastWarn:0
+    };
+    attachDrag(c);
+    cards.push(c);
+  });
+}
+
+function scatterCards(n, w, h){
+  const F = L.field, out = [], pad = 8;
+  for(let i=0;i<n;i++){
+    let best = null;
+    for(let a=0;a<260 && !best;a++){
+      const x = F.x+pad + Math.random()*Math.max(1,(F.w-w-pad*2));
+      const y = F.y+pad + Math.random()*Math.max(1,(F.h-h-pad*2));
+      const r = {x,y,w,h};
+      if(rectOverlap(r, box, 12)) continue;
+      let bad = false;
+      for(let j=0;j<out.length;j++){ if(rectOverlap(r, out[j], 7)){ bad = true; break; } }
+      if(bad) continue;
+      best = r;
+    }
+    if(!best){
+      for(let a=0;a<300 && !best;a++){
+        const x = F.x+pad + Math.random()*Math.max(1,(F.w-w-pad*2));
+        const y = F.y+pad + Math.random()*Math.max(1,(F.h-h-pad*2));
+        const r = {x,y,w,h};
+        if(!rectOverlap(r, box, 8)) best = r;
+      }
+    }
+    if(!best){
+      const cols = Math.max(1, Math.floor((F.w-16)/(w+6)));
+      best = {
+        x: F.x+pad + (i%cols)*(w+6),
+        y: F.y+pad + Math.floor(i/cols)*(h+6),
+        w, h
+      };
+    }
+    out.push(best);
+  }
+  return out;
+}
+
+/* ========================================================
+   卡片拖动
+   ======================================================== */
+function attachDrag(c){
+  const el = c.el;
+  let drag = null;
+
+  el.addEventListener('pointerdown', function(e){
+    if(!state.running || state.paused || state.levelDone) return;
+    e.preventDefault();
+    e.stopPropagation();
+    initAudio();
+    try{ el.setPointerCapture(e.pointerId); }catch(err){}
+    const br = board.getBoundingClientRect();
+    drag = {
+      id: e.pointerId,
+      ox: (e.clientX - br.left) - c.x,
+      oy: (e.clientY - br.top)  - c.y,
+      px: c.x, py: c.y
+    };
+    state.dragging = c;
+    el.classList.add('dragging');
+    el.classList.remove('snap');
+    el.style.zIndex = 60;
+  });
+
+  el.addEventListener('pointermove', function(e){
+    if(!drag || e.pointerId !== drag.id) return;
+    e.preventDefault();
+    const br = board.getBoundingClientRect();
+    let nx = (e.clientX - br.left) - drag.ox;
+    let ny = (e.clientY - br.top)  - drag.oy;
+    nx = clamp(nx, -4, W - c.w + 4);
+    ny = clamp(ny, -4, H - c.h + 4);
+    c.x = nx; c.y = ny;
+    el.style.left = nx+'px';
+    el.style.top  = ny+'px';
+  });
+
+  function endDrag(e){
+    if(!drag || e.pointerId !== drag.id) return;
+    const prev = { x: drag.px, y: drag.py };
+    drag = null;
+    el.classList.remove('dragging');
+    el.style.zIndex = 20;
+    state.dragging = null;
+    handleDrop(c, prev);
+  }
+  el.addEventListener('pointerup', endDrag);
+  el.addEventListener('pointercancel', endDrag);
+}
+
+/* ========================================================
+   判定
+   ======================================================== */
+function zoneAt(px, py){
+  if(rectContains(L.constraint, px, py))  return 'constraint';
+  if(rectContains(L.stakeholder, px, py)) return 'stakeholder';
+  if(rectContains(box, px, py))           return 'inside';
+  return 'env';
+}
+function zoneOfCard(c){ return zoneAt(c.x + c.w/2, c.y + c.h/2); }
+
+function handleDrop(c, prev){
+  const z = zoneOfCard(c);
+  const firstPlace = !c.placed;
+  c.placed = true;
+  c.el.classList.remove('unplaced');
+
+  if(z === c.cat){
+    if(!c.solved){
+      c.solved = true;
+      c.el.classList.add('solved');
+      if(!c.awarded){ c.awarded = true; awardCard(c); }
+    }
+  } else {
+    state.wrongDrops++;
+    explainWrong(c, z);
+    sfxBad();
+    // 弹回原位
+    c.x = prev.x; c.y = prev.y;
+    c.el.classList.add('snap');
+    c.el.style.left = c.x+'px';
+    c.el.style.top  = c.y+'px';
+    c.el.classList.add('wrong');
+    setTimeout(()=>{
+      c.el.classList.remove('snap');
+      c.el.classList.remove('wrong');
+    }, 460);
+  }
+  if(firstPlace) updateHUD();
+}
+
+function awardCard(c){
+  state.score += 10;
+  toast('✅ <b>「'+c.text+'」归位正确</b> · '+c.hint, 'good', 3200);
+  burst(c.x + c.w/2, c.y + c.h/2, '#34d399', 20);
+  sfxGood();
+  updateHUD();
+}
+
+function explainWrong(c, z){
+  const zoneLabel = CAT_INFO[z].label;
+  const rightLabel = CAT_INFO[c.cat].label;
+  toast('❌ <b>「'+c.text+'」不属于 '+zoneLabel+'</b><br>正确位置：<b>'+rightLabel+'</b>。<br>'+c.hint,
+        'bad', 5200);
+}
+
+function warnUnsolved(c){
+  const now = performance.now();
+  if(now - c.lastWarn < 3500) return;
+  c.lastWarn = now;
+  toast('⚠️ 边界调整后，<b>「'+c.text+'」已经露到框外</b>——它不再被算作系统内部要素了。把边框拉大，或把它挪回框内。',
+        'warn', 3800);
+}
+
+/* ========================================================
+   边界框拖动 / 缩放
+   ======================================================== */
+let bDrag = null;
+elBoundary.addEventListener('pointerdown', function(e){
+  if(!state.running || state.paused || state.levelDone) return;
+  e.preventDefault();
+  initAudio();
+  try{ elBoundary.setPointerCapture(e.pointerId); }catch(err){}
+  const dir = (e.target && e.target.dataset) ? e.target.dataset.h : null;
+  bDrag = {
+    id: e.pointerId, dir: dir || null,
+    sx: e.clientX, sy: e.clientY,
+    bx: box.x, by: box.y, bw: box.w, bh: box.h
+  };
+});
+
+elBoundary.addEventListener('pointermove', function(e){
+  if(!bDrag || e.pointerId !== bDrag.id) return;
+  e.preventDefault();
+  const dx = e.clientX - bDrag.sx;
+  const dy = e.clientY - bDrag.sy;
+
+  if(!bDrag.dir){
+    box.x = clamp(bDrag.bx + dx, L.field.x, L.field.x + L.field.w - box.w);
+    box.y = clamp(bDrag.by + dy, L.field.y, L.field.y + L.field.h - box.h);
+    applyBox();
+    return;
+  }
+
+  let x = bDrag.bx, y = bDrag.by, w = bDrag.bw, h = bDrag.bh;
+  const d = bDrag.dir;
+
+  if(d.indexOf('w') >= 0){
+    const nw = bDrag.bw - dx;
+    if(nw >= MINW){ x = bDrag.bx + dx; w = nw; }
+    else { x = bDrag.bx + bDrag.bw - MINW; w = MINW; }
+  }
+  if(d.indexOf('e') >= 0){ w = Math.max(MINW, bDrag.bw + dx); }
+  if(d.indexOf('n') >= 0){
+    const nh = bDrag.bh - dy;
+    if(nh >= MINH){ y = bDrag.by + dy; h = nh; }
+    else { y = bDrag.by + bDrag.bh - MINH; h = MINH; }
+  }
+  if(d.indexOf('s') >= 0){ h = Math.max(MINH, bDrag.bh + dy); }
+
+  // 限制在画布的 field 区域内
+  if(x < L.field.x){ w -= (L.field.x - x); x = L.field.x; }
+  if(y < L.field.y){ h -= (L.field.y - y); y = L.field.y; }
+  if(x + w > L.field.x + L.field.w) w = L.field.x + L.field.w - x;
+  if(y + h > L.field.y + L.field.h) h = L.field.y + L.field.h - y;
+  w = Math.max(MINW, w); h = Math.max(MINH, h);
+  w = Math.min(w, L.field.w); h = Math.min(h, L.field.h);
+
+  box = {x, y, w, h};
+  applyBox();
+});
+
+function endBoxDrag(e){
+  if(bDrag && e.pointerId === bDrag.id) bDrag = null;
+}
+elBoundary.addEventListener('pointerup', endBoxDrag);
+elBoundary.addEventListener('pointercancel', endBoxDrag);
+
+/* ========================================================
+   实时检测
+   ======================================================== */
+function compactness(){
+  const inside = cards.filter(c => c.cat === 'inside');
+  if(!inside.length) return 0;
+  let x1 = 1e9, y1 = 1e9, x2 = -1e9, y2 = -1e9;
+  inside.forEach(c=>{
+    x1 = Math.min(x1, c.x); y1 = Math.min(y1, c.y);
+    x2 = Math.max(x2, c.x + c.w); y2 = Math.max(y2, c.y + c.h);
+  });
+  const pad = 12;
+  const w = (x2 - x1) + pad*2;
+  const h = (y2 - y1) + pad*2;
+  return Math.min(1, (w*h) / Math.max(1, box.w * box.h));
+}
+
+let statusCache = '';
+function updateLive(){
+  if(!cards.length) return 0;
+
+  let solved = 0, insideFull = 0, insideTotal = 0;
+  const overflow = [], intruders = [];
+
+  for(let i=0;i<cards.length;i++){
+    const c = cards[i];
+    const z = zoneOfCard(c);
+    const ok = (z === c.cat);
+
+    if(c !== state.dragging){
+      if(ok !== c.solved){
+        c.solved = ok;
+        c.el.classList.toggle('solved', ok);
+        if(ok && !c.awarded && c.placed){
+          c.awarded = true;
+          awardCard(c);
+        } else if(!ok && c.awarded && c.placed){
+          warnUnsolved(c);
+        }
+      }
+    } else if(ok !== c.solved){
+      c.solved = ok;
+      c.el.classList.toggle('solved', ok);
+    }
+
+    if(c.solved) solved++;
+
+    if(c.cat === 'inside'){
+      insideTotal++;
+      const r = {x:c.x, y:c.y, w:c.w, h:c.h};
+      if(rectInside(box, r)) insideFull++;
+      else overflow.push(c);
+    } else {
+      if(rectContains(box, c.x + c.w/2, c.y + c.h/2)) intruders.push(c);
+    }
+  }
+
+  const compact = compactness();
+  const lv = LEVELS[state.levelIndex];
+  const boundaryOK = (overflow.length === 0 && intruders.length === 0 && compact >= lv.compactTarget);
+
+  if(boundaryOK && !state.boundaryOK){
+    state.boundaryOK = true;
+    elBoundary.classList.add('ok');
+    if(!state.boundaryAwarded){
+      state.boundaryAwarded = true;
+      state.score += 20;
+      toast('🎉 <b>边界闭合！</b>框内只有系统内部要素，外部要素全部在框外。+20 分', 'good', 3600);
+      burst(box.x + box.w/2, box.y + box.h/2, '#22d3ee', 34);
+      sfxWin();
+      updateHUD();
+    }
+  } else if(!boundaryOK && state.boundaryOK){
+    state.boundaryOK = false;
+    elBoundary.classList.remove('ok');
+  }
+
+  const sig = solved + '|' + insideFull + '|' + insideTotal + '|' + intruders.length + '|' + Math.round(compact*100) + '|' + boundaryOK;
+  if(sig !== statusCache){
+    statusCache = sig;
+    updateStatusUI(solved, insideFull, insideTotal, intruders.length, compact, boundaryOK);
+  }
+
+  /* 关卡完成判定 */
+  if(!state.levelDone && solved === cards.length && boundaryOK && cards.every(c=>c.placed)){
+    finishLevel();
+  } else if(!state.levelDone && solved === cards.length && !boundaryOK && !state.completeHintShown){
+    state.completeHintShown = true;
+    toast('👍 <b>12 张卡片全部归位！</b>最后一步：拖动边框手柄，把边界收紧到<b>刚好包住内部要素</b>，然后点【检测边界】。', 'warn', 5200);
+  }
+
+  return solved;
+}
+
+function updateStatusUI(solved, insideFull, insideTotal, intrudeN, compact, ok){
+  if(solved === undefined){
+    insideFull = 0; insideTotal = 0; intrudeN = 0; compact = 0; ok = false;
+  }
+  const elIn  = document.getElementById('st-inside');
+  const elIn2 = document.getElementById('st-intrude');
+  const elC   = document.getElementById('st-compact');
+  const elCl  = document.getElementById('st-closed');
+  elIn.textContent  = insideFull + '/' + insideTotal;
+  elIn.className    = (insideTotal > 0 && insideFull === insideTotal) ? 'ok' : 'bad';
+  elIn2.textContent = intrudeN;
+  elIn2.className   = intrudeN === 0 ? 'ok' : 'bad';
+  elC.textContent   = Math.round(compact*100) + '%';
+  const target = LEVELS[state.levelIndex].compactTarget;
+  elC.className     = compact >= target ? 'ok' : 'warn';
+  elCl.textContent  = ok ? '边界已闭合 ✓' : '边界未闭合';
+  elCl.className    = ok ? 'ok' : 'warn';
+}
+
+function updateHUD(){
+  document.getElementById('hud-level').textContent = (state.levelIndex+1) + '/' + LEVELS.length;
+  document.getElementById('hud-score').textContent = state.score;
+  const solved = cards.filter(c=>c.solved).length;
+  document.getElementById('hud-progress').textContent = solved + '/' + cards.length;
+  const t = Math.floor(state.elapsed/1000);
+  document.getElementById('hud-time').textContent =
+    Math.floor(t/60) + ':' + String(t%60).padStart(2,'0');
+}
+
+/* ========================================================
+   检测按钮
+   ======================================================== */
+function checkBoundary(){
+  if(!state.running || state.paused || state.levelDone) return;
+  const insideCards = cards.filter(c => c.cat === 'inside');
+  const overflow = insideCards.filter(c => !rectInside(box, {x:c.x,y:c.y,w:c.w,h:c.h}));
+  const intruders = cards.filter(c => c.cat !== 'inside' &&
+                        rectContains(box, c.x + c.w/2, c.y + c.h/2));
+  const compact = compactness();
+  const target = LEVELS[state.levelIndex].compactTarget;
+
+  if(overflow.length){
+    overflow.forEach(flashCard);
+    toast('❌ <b>边界没有闭合</b>：内部要素「'+overflow[0].text+'」' +
+          (overflow.length>1 ? ' 等 '+overflow.length+' 个' : '') +
+          '露在框外。把边框拉大，或把这些要素挪进框内。', 'bad', 5000);
+    sfxBad();
+    return;
+  }
+  if(intruders.length){
+    intruders.forEach(flashCard);
+    toast('❌ <b>边界画得太宽</b>：把「'+intruders[0].text+'」划进了系统内部。它是 <b>' +
+          CAT_INFO[intruders[0].cat].label + '</b>，不属于内部处理链条。把边框收紧到刚好包住内部要素。',
+          'bad', 5200);
+    sfxBad();
+    return;
+  }
+  if(compact < target){
+    toast('⚠️ <b>边界还不够紧凑</b>（当前 '+Math.round(compact*100)+'%，需要 ≥ '+
+          Math.round(target*100)+'%）。拖动边框手柄，让它只包住内部要素，不多一寸。', 'warn', 4800);
+    sfxWarn();
+    return;
+  }
+  burst(box.x + box.w/2, box.y + box.h/2, '#22d3ee', 26);
+  sfxGood();
+  toast('✅ <b>边界检测通过</b>：内部要素全部被完整包含，外部要素全部在框外，紧凑度 '+
+        Math.round(compact*100)+'%。', 'good', 3600);
+}
+
+function flashCard(c){
+  c.el.classList.remove('flash');
+  void c.el.offsetWidth;
+  c.el.classList.add('flash');
+  setTimeout(()=>c.el.classList.remove('flash'), 1700);
+}
+
+/* ========================================================
+   提示
+   ======================================================== */
+function hintCard(){
+  if(!state.running || state.paused || state.levelDone) return;
+  const unsolved = cards.filter(c => !c.solved);
+  if(!unsolved.length){
+    toast('💡 所有卡片都归位了，接下来只需要把边界收紧。', 'warn', 3000);
+    return;
+  }
+  state.hintsUsed++;
+  const c = unsolved[Math.floor(Math.random()*unsolved.length)];
+  c.el.classList.add('flash');
+  setTimeout(()=>c.el.classList.remove('flash'), 1700);
+
+  const zone = CAT_INFO[c.cat];
+  const zoneEl = c.cat === 'constraint' ? elConstraint
+               : c.cat === 'stakeholder' ? elStake
+               : c.cat === 'inside' ? elBoundary : null;
+  if(zoneEl){
+    const old = zoneEl.style.boxShadow;
+    zoneEl.style.boxShadow = '0 0 0 5px rgba(251,191,36,.55), 0 0 30px rgba(251,191,36,.6)';
+    setTimeout(()=>{ zoneEl.style.boxShadow = old; }, 1400);
+  }
+  toast('💡 <b>「'+c.text+'」</b> 应该放在 <b>'+zone.label+'</b>。<br>'+c.hint, 'warn', 4600);
+  sfxWarn();
+}
+
+/* ========================================================
+   成就 / 存档
+   ======================================================== */
+const SAVE_KEY = 'sysbound_v1';
+let save = { ach:[], best:{}, total:0 };
+function loadSave(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(raw) save = Object.assign(save, JSON.parse(raw));
+  }catch(e){}
+}
+function persist(){
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify(save)); }catch(e){}
+}
+function unlock(id){
+  if(save.ach.indexOf(id) >= 0) return false;
+  save.ach.push(id);
+  persist();
+  const a = ACHS.filter(x=>x.id===id)[0];
+  if(a){
+    sfxAch();
+    toast('🏅 <b>成就解锁：'+a.icon+' '+a.name+'</b> · '+a.desc, 'ach', 4200);
+  }
+  renderAchievements();
+  return true;
+}
+function renderAchievements(){
+  const wrap = document.getElementById('start-ach');
+  if(!wrap) return;
+  wrap.innerHTML = ACHS.map(a =>
+    '<div class="ach '+(save.ach.indexOf(a.id)>=0?'on':'')+'">'+a.icon+' '+a.name+'</div>'
+  ).join('');
+}
+
+/* ========================================================
+   关卡完成
+   ======================================================== */
+function finishLevel(){
+  state.levelDone = true;
+  state.running = false;
+  const lv = LEVELS[state.levelIndex];
+  const secs = state.elapsed/1000;
+  const tBonus = Math.max(0, Math.round(((lv.parTime - secs)/lv.parTime) * 5 * cards.length));
+  state.score += tBonus;
+  state.lastCompact = compactness();
+
+  /* 成就 */
+  if(state.wrongDrops === 0) unlock('first_try');
+  if(state.lastCompact >= 0.65) unlock('tight');
+  if(secs <= 90) unlock('speed');
+  if(state.hintsUsed === 0) unlock('solo');
+  if(state.score >= 600) unlock('high');
+  if(state.levelIndex >= LEVELS.length-1) unlock('all');
+
+  save.best['L'+(state.levelIndex+1)] = Math.max(save.best['L'+(state.levelIndex+1)]||0, state.score - state.levelBase);
+  save.total = state.score;
+  persist();
+
+  const isLast = state.levelIndex >= LEVELS.length-1;
+  const card = document.getElementById('level-card');
+  card.innerHTML =
+    '<h1>'+(isLast ? '🏆 全部通关！' : '🎉 过关！')+'</h1>'+
+    '<p class="lead">'+lv.name+' · 四类要素全部归位，边界闭合。</p>'+
+    '<div class="score-grid">'+
+      '<div class="score-item"><div class="k">归位得分</div><div class="v">'+(cards.length*10)+'</div></div>'+
+      '<div class="score-item"><div class="k">边界奖励</div><div class="v">'+(state.boundaryAwarded?20:0)+'</div></div>'+
+      '<div class="score-item"><div class="k">速度奖励</div><div class="v">+'+tBonus+'</div></div>'+
+      '<div class="score-item"><div class="k">用时</div><div class="v">'+Math.floor(secs/60)+':'+String(Math.floor(secs%60)).padStart(2,'0')+'</div></div>'+
+      '<div class="score-item"><div class="k">紧凑度</div><div class="v">'+Math.round(state.lastCompact*100)+'%</div></div>'+
+      '<div class="score-item"><div class="k">错误拖放</div><div class="v">'+state.wrongDrops+'</div></div>'+
+    '</div>'+
+    '<div class="ach-line">'+ACHS.map(a=>
+      '<div class="ach '+(save.ach.indexOf(a.id)>=0?'on':'')+'">'+a.icon+' '+a.name+'</div>').join('')+'</div>'+
+    '<div class="overlay-actions">'+
+      (isLast
+        ? '<button class="btn primary big" onclick="restartAll()">🔁 再玩一次</button>'
+        : '<button class="btn primary big" onclick="nextLevel()">▶ 进入下一关</button>')+
+      '<button class="btn big" onclick="retryLevel()">↺ 重玩本关</button>'+
+    '</div>';
+  document.getElementById('overlay-level').classList.remove('hidden');
+}
+
+/* ========================================================
+   主循环
+   ======================================================== */
+let lastT = 0;
+function loop(t){
+  requestAnimationFrame(loop);
+  if(!lastT) lastT = t;
+  const dt = Math.min(60, t - lastT);
+  lastT = t;
+
+  if(state.running && !state.paused){
+    state.elapsed += dt;
+    if(Math.floor(state.elapsed/500) !== Math.floor((state.elapsed-dt)/500)) updateHUD();
+  }
+  updateLive();
+  stepParticles(dt);
+}
+
+/* ========================================================
+   全局控制函数（供 onclick 调用）
+   ======================================================== */
+window.startGame = function(){
+  document.getElementById('overlay-start').classList.add('hidden');
+  document.getElementById('overlay-help').classList.add('hidden');
+  document.getElementById('overlay-level').classList.add('hidden');
+  document.getElementById('overlay-pause').classList.add('hidden');
+  state.paused = false;
+  loadLevel(0);
+  state.running = true;
+  initAudio();
+  toast('👉 拖动卡片到正确区域；拖动蓝色边框手柄收放边界。', 'good', 5200);
+};
+
+window.nextLevel = function(){
+  document.getElementById('overlay-level').classList.add('hidden');
+  loadLevel(Math.min(LEVELS.length-1, state.levelIndex+1));
+  state.running = true;
+};
+
+window.retryLevel = function(){
+  document.getElementById('overlay-level').classList.add('hidden');
+  state.score = state.levelBase;
+  loadLevel(state.levelIndex);
+  state.running = true;
+};
+
+window.restartAll = function(){
+  document.getElementById('overlay-level').classList.add('hidden');
+  state.score = 0;
+  loadLevel(0);
+  state.running = true;
+};
+
+window.resetLevel = function(){
+  if(!state.running || state.levelDone) return;
+  document.getElementById('overlay-pause').classList.add('hidden');
+  state.paused = false;
+  state.score = state.levelBase;
+  loadLevel(state.levelIndex);
+  state.running = true;
+  toast('↺ 本关已重置，分数回到本关起点。', 'warn', 2600);
+};
+
+window.togglePause = function(){
+  if(!state.running || state.levelDone) return;
+  state.paused = !state.paused;
+  document.getElementById('overlay-pause').classList.toggle('hidden', !state.paused);
+};
+
+window.toggleMute = function(){
+  state.soundOn = !state.soundOn;
+  document.getElementById('mute-btn').textContent = state.soundOn ? '🔊' : '🔇';
+  if(state.soundOn){ initAudio(); sfxWarn(); }
+};
+
+window.showHelp = function(){
+  document.getElementById('overlay-help').classList.remove('hidden');
+};
+window.hideHelp = function(){
+  document.getElementById('overlay-help').classList.add('hidden');
+};
+window.checkBoundary = checkBoundary;
+window.hintCard = hintCard;
+
+window.setGameParam = function(key, value){
+  if(key === 'level'){
+    const i = clamp(parseInt(value,10)-1 || 0, 0, LEVELS.length-1);
+    loadLevel(i);
+    state.running = true;
+    document.getElementById('overlay-start').classList.add('hidden');
+    return true;
+  }
+  if(key === 'score'){ state.score = Number(value)||0; updateHUD(); return true; }
+  if(key === 'compactTarget'){
+    LEVELS[state.levelIndex].compactTarget = clamp(Number(value)||0.4, 0.05, 0.95);
+    return true;
+  }
+  if(key === 'sound'){ state.soundOn = !!value; return true; }
+  return false;
+};
+
+/* ========================================================
+   自适应
+   ======================================================== */
+let resizeTimer = null, prevW = 0, prevH = 0;
+function relayout(){
+  const oldW = W || board.clientWidth || 1;
+  const oldH = H || board.clientHeight || 1;
+  computeLayout();
+  const sx = W/oldW, sy = H/oldH;
+
+  cards.forEach(c=>{
+    c.w = cardW; c.h = cardH;
+    c.x = clamp(c.x*sx, -4, W-c.w+4);
+    c.y = clamp(c.y*sy, -4, H-c.h+4);
+    c.el.style.width  = c.w+'px';
+    c.el.style.height = c.h+'px';
+    c.el.style.left   = c.x+'px';
+    c.el.style.top    = c.y+'px';
+  });
+  box = {
+    x: clamp(box.x*sx, L.field.x, L.field.x+L.field.w-MINW),
+    y: clamp(box.y*sy, L.field.y, L.field.y+L.field.h-MINH),
+    w: clamp(box.w*sx, MINW, L.field.w),
+    h: clamp(box.h*sy, MINH, L.field.h)
+  };
+  applyLayout();
+  applyBox();
+  resizeFX();
+  statusCache = '';
+}
+window.addEventListener('resize', ()=>{
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(relayout, 120);
+});
+
+/* ========================================================
+   初始化
+   ======================================================== */
+loadSave();
+renderAchievements();
+computeLayout();
+applyLayout();
+resizeFX();
+centerBox();
+buildCards(LEVELS[0]);
+updateHUD();
+updateStatusUI();
+requestAnimationFrame(loop);
+
+document.addEventListener('pointerdown', function once(){
+  initAudio();
+  document.removeEventListener('pointerdown', once);
+}, {passive:true});
+
+/* ========================================================
+   postMessage 驱动接口
+   ======================================================== */
+window.addEventListener('message', function(event){
+  const data = event.data || {};
+  const type = data.type;
+
+  switch(type){
+    case 'SET_WIDGET_STATE': {
+      const st = data.state;
+      if(st){
+        Object.keys(st).forEach(function(key){
+          const value = st[key];
+          const control = document.getElementById(key + '-slider')
+                       || document.getElementById(key)
+                       || document.querySelector('[data-var="' + key + '"]');
+          if(control && 'value' in control){
+            control.value = value;
+            control.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+          if(typeof window.setGameParam === 'function') window.setGameParam(key, value);
+        });
+      }
+      break;
+    }
+    case 'HIGHLIGHT_ELEMENT': {
+      const el = document.querySelector(data.target);
+      if(el){
+        el.style.outline = '3px solid rgba(139,92,246,.85)';
+        el.style.outlineOffset = '4px';
+        el.style.animation = 'pulse-highlight 2s infinite';
+        setTimeout(()=>{
+          el.style.outline = '';
+          el.style.outlineOffset = '';
+          el.style.animation = '';
+        }, 3000);
+      }
+      break;
+    }
+    case 'ANNOTATE_ELEMENT': {
+      const el = document.querySelector(data.target);
+      if(el && data.content){
+        const rect = el.getBoundingClientRect();
+        const tip = document.createElement('div');
+        tip.className = 'teacher-annotation';
+        tip.style.cssText =
+          'position:fixed;top:' + Math.max(6, rect.top - 44) + 'px;left:' +
+          Math.max(6, rect.left) + 'px;background:rgba(139,92,246,.95);color:#fff;' +
+          'padding:8px 12px;border-radius:8px;font-size:13px;z-index:1000;' +
+          'box-shadow:0 8px 22px rgba(0,0,0,.5);animation:fadeIn .3s;';
+        tip.textContent = data.content;
+        document.body.appendChild(tip);
+        setTimeout(()=>tip.remove(), 4000);
+      }
+      break;
+    }
+    case 'REVEAL_ELEMENT': {
+      const el = document.querySelector(data.target);
+      if(el){
+        el.style.display = '';
+        el.style.opacity = '1';
+      }
+      break;
+    }
+  }
+});
+
+const styleTag = document.createElement('style');
+styleTag.textContent =
+  '@keyframes pulse-highlight{0%,100%{outline-color:rgba(139,92,246,.85)}' +
+  '50%{outline-color:rgba(139,92,246,.35)}}' +
+  '@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}';
+document.head.appendChild(styleTag);
+
+}); /* end DOMContentLoaded */
+</script>
+</body>
+</html>
