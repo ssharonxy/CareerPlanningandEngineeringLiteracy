@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<script data-iframe-storage-shim>
+(function () {
+  function makeStore() {
+    var data = Object.create(null);
+    return {
+      getItem: function (k) { k = String(k); return Object.prototype.hasOwnProperty.call(data, k) ? data[k] : null; },
+      setItem: function (k, v) { data[String(k)] = String(v); },
+      removeItem: function (k) { delete data[String(k)]; },
+      clear: function () { data = Object.create(null); },
+      key: function (i) { var keys = Object.keys(data); return i < keys.length ? keys[i] : null; },
+      get length() { return Object.keys(data).length; }
+    };
+  }
+  ['localStorage', 'sessionStorage'].forEach(function (name) {
+    var ok = false;
+    try { var s = window[name]; if (s) { s.getItem('__probe__'); ok = true; } } catch (e) { ok = false; }
+    if (!ok) {
+      try { Object.defineProperty(window, name, { value: makeStore(), configurable: true }); } catch (e) {}
+    }
+  });
+})();
+</script>
+<script data-iframe-error-shim>
+(function () {
+  var buffer = [];
+  function emit(errorKind, message) {
+    try {
+      window.parent.postMessage(
+        { __maicInteractive: true, kind: 'runtime-error', errorKind: errorKind, message: message },
+        '*'
+      );
+    } catch (e) {}
+  }
+  function post(errorKind, message) {
+    message = String(message).slice(0, 1200);
+    if (buffer.length < 50) buffer.push([errorKind, message]);
+    emit(errorKind, message);
+  }
+  window.addEventListener('message', function (e) {
+    var d = e && e.data;
+    if (d && d.__maicErrorReplayRequest === true) {
+      for (var i = 0; i < buffer.length; i++) emit(buffer[i][0], buffer[i][1]);
+    }
+  });
+  window.addEventListener('error', function (e) {
+    // 良性浏览器告警（ResizeObserver 一帧内回调跑不完，下帧自愈），不是真实错误，静默丢弃。
+    // 这是对上游 shim 的唯一一处刻意偏离：否则几乎每个含 ResizeObserver 的页面都会弹红色横幅。
+    if (e && e.message && /^ResizeObserver loop/i.test(e.message)) return;
+    if (e && e.message) {
+      post('error', e.message + (e.filename ? ' (' + e.filename + ':' + (e.lineno || 0) + ')' : ''));
+    } else if (e && e.target && (e.target.src || e.target.href)) {
+      post('resource', 'Failed to load resource: ' + (e.target.src || e.target.href));
+    }
+  }, true);
+  window.addEventListener('unhandledrejection', function (e) {
+    var r = e && e.reason;
+    post('unhandledrejection', (r && (r.stack || r.message)) || r || 'unhandled promise rejection');
+  });
+  try {
+    var c = window.console;
+    if (c && c.error) {
+      var _ce = c.error;
+      c.error = function () {
+        try { post('console.error', Array.prototype.map.call(arguments, function (a) { return (a && a.stack) || String(a); }).join(' ')); } catch (e) {}
+        return _ce.apply(c, arguments);
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>精力分配挑战：四年冲线</title>
+<style>
+:root{
+  --bg:#0b1020;
+  --card:rgba(255,255,255,0.055);
+  --line:rgba(255,255,255,0.10);
+  --txt:#e8edf7;
+  --dim:#8b9ac0;
+  --blue:#4aa8ff;
+  --green:#42d392;
+  --amber:#ffb347;
+  --purple:#b07cff;
+  --teal:#4fd6d6;
+  --red:#ff5f7a;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:radial-gradient(circle at 20% 0%,#1d2b4a 0%,#0d1322 55%,#070a12 100%);
+  background-attachment:fixed;
+  color:var(--txt);
+  min-height:100vh;
+  overflow-x:hidden;
+  font-size:15px;
+}
+.screen{max-width:1000px;margin:0 auto;padding:12px 12px 28px;}
+.hidden{display:none !important;}
+
+/* ---------- start ---------- */
+.start-panel{
+  background:var(--card);border:1px solid var(--line);border-radius:20px;
+  padding:18px;margin-top:10px;
+  animation:panelIn .4s ease;
+}
+h1{font-size:clamp(19px,5vw,27px);margin:0 0 6px;line-height:1.25;text-align:center;}
+.lead{font-size:14px;color:#c3cee6;line-height:1.6;text-align:center;margin:0 0 14px;}
+.lead b{color:var(--blue);}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-bottom:12px;}
+.rule{display:flex;gap:8px;align-items:flex-start;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:8px 10px;}
+.rule span{font-size:19px;line-height:1.2;}
+.rule b{font-size:13.5px;}
+.rule p{margin:2px 0 0;font-size:11.5px;color:var(--dim);line-height:1.35;}
+.danger-note{color:#ffb0be;background:rgba(255,95,122,0.1);border:1px solid rgba(255,95,122,0.3);padding:9px 12px;border-radius:10px;font-size:12.5px;margin:0 0 16px;text-align:center;}
+h3{font-size:15px;margin:0 0 10px;color:#dfe8fb;}
+.jobs{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:16px;}
+.job{background:rgba(255,255,255,0.04);border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;cursor:pointer;transition:.2s;}
+.job:active{transform:scale(.98);}
+.job.sel{border-color:var(--blue);background:rgba(74,168,255,0.12);box-shadow:0 0 0 3px rgba(74,168,255,0.14);}
+.job-top{display:flex;align-items:center;gap:6px;}
+.job-ico{font-size:17px;}
+.job-name{font-weight:700;font-size:14px;}
+.job-clear{margin-left:auto;font-size:10.5px;color:var(--green);border:1px solid rgba(66,211,146,.4);border-radius:6px;padding:1px 5px;}
+.job-tag{font-size:11.5px;color:var(--blue);margin-top:3px;}
+.job-meta{font-size:11.5px;color:var(--dim);margin-top:4px;}
+.job-tip{font-size:11.5px;color:#a9b6d4;margin-top:6px;line-height:1.45;}
+
+/* ---------- buttons ---------- */
+.btn{border:none;border-radius:12px;padding:12px 18px;font-size:15px;font-weight:600;cursor:pointer;min-height:46px;font-family:inherit;transition:transform .1s,filter .2s,background .2s;color:#fff;}
+.btn:active{transform:scale(.97);}
+.btn.primary{background:linear-gradient(135deg,#4aa8ff,#5b7cff);box-shadow:0 6px 18px rgba(74,168,255,.28);}
+.btn.primary:disabled{background:rgba(255,255,255,0.09);color:var(--dim);box-shadow:none;cursor:not-allowed;transform:none;}
+.btn.ghost{background:rgba(255,255,255,0.07);color:#cfd9ee;border:1px solid var(--line);}
+.btn.big{width:100%;padding:16px;font-size:16.5px;}
+
+/* ---------- HUD ---------- */
+.hud{display:flex;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:9px 11px;margin-top:8px;}
+.hud-cell{display:flex;flex-direction:column;min-width:0;}
+.hud-cell.grow{flex:1;min-width:0;}
+.hud-k{font-size:10.5px;color:var(--dim);letter-spacing:.5px;}
+.hud-v{font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+.bar-row{display:flex;align-items:center;gap:8px;margin-top:8px;}
+.bar-label{font-size:11.5px;color:var(--dim);width:44px;flex:none;}
+.bar{position:relative;flex:1;height:15px;background:rgba(255,255,255,0.07);border-radius:8px;overflow:hidden;}
+.bar-fill{height:100%;width:0;border-radius:8px;transition:width .55s cubic-bezier(.2,.8,.3,1);background:linear-gradient(90deg,#4aa8ff,#7dd3fc);}
+.bar-fill.fatigue{background:linear-gradient(90deg,#4fd6d6,#8b5cf6);}
+.bar-fill.fatigue.danger{background:linear-gradient(90deg,#ffb347,#ff5f7a);}
+.bar-target{position:absolute;top:0;left:60%;width:2.5px;height:100%;background:#ffb347;box-shadow:0 0 8px rgba(255,179,71,.9);transition:left .4s;border-radius:2px;}
+.bar-val{font-size:11.5px;color:var(--dim);width:78px;text-align:right;flex:none;font-variant-numeric:tabular-nums;}
+.bar-val b{color:#e8edf7;font-size:13.5px;}
+
+.goal-strip{display:flex;gap:10px;flex-wrap:wrap;font-size:11.5px;color:var(--dim);margin-top:8px;padding:0 2px;}
+.goal-strip .gs-main{color:#e8edf7;font-weight:700;}
+.goal-strip .ok{color:#7ee0a8;}
+.goal-strip .no{color:var(--amber);}
+
+/* ---------- pool ---------- */
+.pool{margin-top:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;}
+.pool-head{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;color:var(--dim);}
+.pool-num b{color:#fff;font-size:17px;font-variant-numeric:tabular-nums;}
+.chips{display:flex;gap:5px;margin-top:9px;flex-wrap:wrap;}
+.chip{width:19px;height:10px;border-radius:5px;background:rgba(255,255,255,0.1);transition:.25s;}
+.chip.on{background:linear-gradient(90deg,#4aa8ff,#7dd3fc);box-shadow:0 0 9px rgba(74,168,255,.5);}
+.preview{margin-top:9px;font-size:11.5px;color:var(--dim);display:flex;gap:12px;flex-wrap:wrap;}
+.preview b{color:#dfe8fb;font-variant-numeric:tabular-nums;}
+.preview .warn{color:var(--amber);}
+.preview .bad{color:var(--red);}
+
+/* ---------- buckets ---------- */
+.buckets{display:grid;grid-template-columns:repeat(auto-fit,minmax(152px,1fr));gap:8px;margin-top:10px;}
+.bucket{position:relative;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:10px;cursor:pointer;transition:border-color .18s,transform .1s;user-select:none;overflow:hidden;}
+.bucket:active{transform:scale(.985);}
+.bucket.active{border-color:var(--c);}
+.bucket::after{content:'';position:absolute;inset:0;background:var(--c);opacity:0;transition:opacity .25s;pointer-events:none;}
+.bucket.active::after{opacity:.10;}
+.bucket>*{position:relative;z-index:1;}
+.b-top{display:flex;align-items:center;gap:5px;}
+.b-ico{font-size:16px;}
+.b-name{font-size:12.5px;font-weight:700;}
+.b-count{margin-left:auto;font-size:17px;font-weight:800;color:var(--c);min-width:16px;text-align:right;font-variant-numeric:tabular-nums;}
+.b-desc{font-size:10.5px;color:var(--dim);margin-top:3px;line-height:1.3;min-height:26px;}
+.b-stat{display:flex;justify-content:space-between;font-size:10.5px;color:var(--dim);margin-top:5px;}
+.b-stat b{color:#dfe8fb;font-size:12px;font-variant-numeric:tabular-nums;}
+.mini{height:6px;border-radius:3px;background:rgba(255,255,255,0.08);overflow:hidden;margin-top:4px;}
+.mini i{display:block;height:100%;width:0;border-radius:3px;transition:width .35s;}
+.b-ctrl{display:flex;gap:6px;margin-top:8px;}
+.pm{flex:1;height:36px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,0.06);color:#dfe8fb;font-size:19px;font-weight:700;cursor:pointer;font-family:inherit;line-height:1;transition:transform .1s,background .15s;}
+.pm.plus{background:rgba(255,255,255,0.13);}
+.pm:active{transform:scale(.93);}
+@keyframes pop{0%{transform:scale(1);}40%{transform:scale(1.55);}100%{transform:scale(1);}}
+.pop{animation:pop .28s ease;}
+
+.action-bar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.action-bar .btn.primary{flex:1;min-width:150px;}
+
+.trend-panel{margin-top:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 8px 2px;}
+canvas{width:100%;height:auto;display:block;}
+
+/* ---------- overlay ---------- */
+.overlay{position:fixed;inset:0;background:rgba(6,9,18,0.84);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:14px;z-index:100;overflow-y:auto;}
+.overlay.hidden{display:none;}
+.overlay-panel{background:#131a2e;border:1px solid rgba(255,255,255,0.12);border-radius:18px;padding:16px;max-width:520px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 24px 70px rgba(0,0,0,.65);animation:panelIn .3s ease;margin:auto;}
+@keyframes panelIn{from{opacity:0;transform:translateY(16px) scale(.97);}to{opacity:1;transform:none;}}
+
+.ev-head{display:flex;gap:10px;align-items:center;}
+.ev-icon{font-size:30px;line-height:1;}
+.ev-kicker{font-size:10.5px;color:var(--amber);letter-spacing:1px;}
+.ev-title{font-size:16.5px;font-weight:800;line-height:1.3;}
+.ev-text{font-size:13.5px;color:#c3cee6;line-height:1.65;margin:12px 0;}
+.ev-choices{display:flex;flex-direction:column;gap:8px;}
+.btn.choice{background:rgba(255,255,255,0.07);border:1px solid var(--line);color:#e8edf7;text-align:left;font-size:14px;line-height:1.4;padding:13px 15px;}
+.btn.choice:active{background:rgba(74,168,255,.2);}
+.fx-row{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0;}
+.fx-chip{font-size:11.5px;padding:4px 9px;border-radius:20px;background:rgba(255,255,255,0.08);border:1px solid var(--line);}
+.fx-chip.up{color:#7ee0a8;}
+.fx-chip.down{color:var(--red);}
+
+.res-head{text-align:center;margin-bottom:12px;}
+.res-kicker{font-size:11.5px;color:var(--dim);letter-spacing:1px;}
+.res-title{font-size:20px;font-weight:800;margin-top:2px;}
+.res-sub{font-size:11.5px;color:var(--dim);margin-top:3px;line-height:1.5;}
+.res-list{display:flex;flex-direction:column;gap:6px;}
+.res-row{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,0.045);border-radius:10px;padding:9px 10px;font-size:13px;animation:rowIn .35s ease both;flex-wrap:wrap;}
+@keyframes rowIn{from{opacity:0;transform:translateX(-10px);}to{opacity:1;transform:none;}}
+.rr-ico{font-size:15px;}
+.rr-label{color:var(--dim);width:50px;font-size:12px;}
+.rr-gain{color:var(--green);font-weight:800;font-variant-numeric:tabular-nums;}
+.rr-gain.bad{color:var(--red);}
+.rr-arrow{color:#4c5a7a;}
+.rr-after{font-weight:800;font-variant-numeric:tabular-nums;}
+.rr-comp{margin-left:auto;font-size:10.5px;color:var(--amber);font-variant-numeric:tabular-nums;}
+.res-foot{display:flex;align-items:center;gap:8px;justify-content:center;margin:14px 0 10px;font-size:13px;color:var(--dim);}
+.res-foot b{color:#fff;font-size:17px;font-variant-numeric:tabular-nums;}
+.res-target{font-size:11.5px;}
+.res-warn{font-size:12px;color:#ffcf8a;background:rgba(255,179,71,.1);border:1px solid rgba(255,179,71,.28);border-radius:10px;padding:9px 11px;line-height:1.55;margin:10px 0;}
+.overlay-panel .btn.primary{width:100%;margin-top:6px;}
+
+.end-head{text-align:center;}
+.end-emoji{font-size:44px;line-height:1;}
+.end-head h2{margin:8px 0 4px;font-size:21px;}
+.end-head.win h2{color:#7ee0a8;}
+.end-head.lose h2{color:#ff8fa3;}
+.stars{font-size:22px;letter-spacing:5px;margin:2px 0 6px;}
+.end-sub{font-size:12.5px;color:var(--dim);line-height:1.6;}
+.end-sub b{color:#fff;font-size:16px;}
+.end-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin:14px 0;}
+.es{background:rgba(255,255,255,0.05);border-radius:10px;padding:8px 10px;display:flex;justify-content:space-between;font-size:12.5px;color:var(--dim);}
+.es b{color:#e8edf7;font-variant-numeric:tabular-nums;}
+.req-list{margin:6px 0 2px;}
+.req{font-size:12.5px;padding:5px 0;display:flex;gap:7px;align-items:center;}
+.req.ok{color:#7ee0a8;}
+.req.no{color:#ff8fa3;}
+.end-btns{display:flex;gap:8px;margin-top:14px;}
+.end-btns .btn{flex:1;}
+
+/* ---------- toasts ---------- */
+#toasts{position:fixed;top:10px;right:10px;display:flex;flex-direction:column;gap:8px;z-index:200;pointer-events:none;max-width:min(300px,80vw);}
+.toast{background:rgba(19,26,46,0.97);border:1px solid rgba(255,255,255,0.14);border-radius:12px;padding:10px 13px;font-size:12.5px;display:flex;gap:8px;align-items:center;box-shadow:0 12px 32px rgba(0,0,0,.55);animation:toastIn .3s ease;transition:.4s;line-height:1.4;}
+.toast.ach{border-color:rgba(255,179,71,.55);box-shadow:0 0 22px rgba(255,179,71,.25);}
+.toast.out{opacity:0;transform:translateX(34px);}
+.toast-ico{font-size:19px;line-height:1;}
+@keyframes toastIn{from{opacity:0;transform:translateX(34px);}to{opacity:1;transform:none;}}
+
+@media (max-width:420px){
+  .b-desc{min-height:24px;font-size:10px;}
+  .bar-val{width:66px;}
+  .hud-v{font-size:12.5px;}
+}
+</style>
+</head>
+<body>
+
+<div class="screen">
+  <!-- ============ 开始界面 ============ -->
+  <div id="start-screen">
+    <div class="start-panel">
+      <h1>🎓 精力分配挑战：四年冲线</h1>
+      <p class="lead">你是大一新生。大学 8 个学期，每学期只有 <b>12 点精力</b>。<br>投在哪里，决定你毕业那天能不能拿到 offer。</p>
+
+      <div class="rules">
+        <div class="rule"><span>🧠</span><div><b>硬技能</b><p>算法、编码、专业基础</p></div></div>
+        <div class="rule"><span>🗣️</span><div><b>软技能</b><p>表达、沟通、团队协作</p></div></div>
+        <div class="rule"><span>🛠️</span><div><b>项目</b><p>作品集，越早启动复利越高</p></div></div>
+        <div class="rule"><span>💼</span><div><b>实习</b><p>受项目经验加成，地基不稳会打折</p></div></div>
+        <div class="rule"><span>😴</span><div><b>休息</b><p>恢复疲劳；疲劳高会拖垮所有效率</p></div></div>
+      </div>
+
+      <p class="danger-note">⚠️ 疲劳值达到 <b>92</b> 会直接<b>崩盘</b>，四年白读</p>
+
+      <h3>选择你的目标岗位（难度）</h3>
+      <div class="jobs" id="job-list"></div>
+
+      <button class="btn primary big" onclick="startGame()">开始四年 →</button>
+    </div>
+  </div>
+
+  <!-- ============ 游戏界面 ============ -->
+  <div id="game-screen" class="hidden">
+    <div class="hud">
+      <div class="hud-cell">
+        <span class="hud-k">学期</span>
+        <span class="hud-v" id="hud-sem">1 / 8</span>
+      </div>
+      <div class="hud-cell grow">
+        <span class="hud-k">目标岗位</span>
+        <span class="hud-v" id="hud-job">后端开发工程师</span>
+      </div>
+      <div class="hud-cell">
+        <span class="hud-k">疲劳</span>
+        <span class="hud-v" id="hud-fatigue">10%</span>
+      </div>
+    </div>
+
+    <div class="bar-row">
+      <span class="bar-label">就绪度</span>
+      <div class="bar">
+        <div class="bar-fill" id="bar-ready"></div>
+        <div class="bar-target" id="target-mark"></div>
+      </div>
+      <span class="bar-val"><b id="ready-val">0</b> / <span id="target-val">60</span></span>
+    </div>
+
+    <div class="bar-row">
+      <span class="bar-label">疲劳</span>
+      <div class="bar">
+        <div class="bar-fill fatigue" id="bar-fatigue"></div>
+      </div>
+      <span class="bar-val"><b id="fatigue-val">10</b>%</span>
+    </div>
+
+    <div class="goal-strip" id="goal-strip"></div>
+
+    <div class="pool">
+      <div class="pool-head">
+        <span>可用精力点</span>
+        <span class="pool-num"><b id="energy-left">12</b> / 12</span>
+      </div>
+      <div class="chips" id="chips"></div>
+      <div class="preview" id="preview"></div>
+    </div>
+
+    <div class="buckets" id="buckets"></div>
+
+    <div class="action-bar">
+      <button id="resolve-btn" class="btn primary" onclick="resolveSemester()">结算本学期 →</button>
+      <button class="btn ghost" onclick="autoBalance()">均衡分配</button>
+      <button class="btn ghost" onclick="clearAlloc()">清空</button>
+    </div>
+
+    <div class="trend-panel">
+      <canvas id="trend" width="660" height="140"></canvas>
+    </div>
+  </div>
+</div>
+
+<div id="overlay" class="overlay hidden">
+  <div class="overlay-panel" id="overlay-content"></div>
+</div>
+
+<div id="toasts"></div>
+
+<script type="application/json" id="widget-config">
+{
+  "type": "game",
+  "gameType": "strategy",
+  "description": "精力分配挑战：四年冲线 —— 8 个学期分配有限精力点，达成岗位就绪度并避免疲劳崩盘。",
+  "gameConfig": {
+    "controls": ["hard", "soft", "proj", "intern", "rest"],
+    "pointsPerSemester": 12,
+    "semesters": 8,
+    "burnoutThreshold": 92
+  },
+  "scoring": { "correctPoints": 10, "speedBonus": 5 },
+  "achievements": [
+    { "id": "first", "name": "迈出第一步", "icon": "🌱" },
+    { "id": "clear1", "name": "冲线成功", "icon": "🏁" },
+    { "id": "fresh", "name": "稳如老狗", "icon": "😌" },
+    { "id": "compound", "name": "复利大师", "icon": "📈" },
+    { "id": "balance", "name": "全能选手", "icon": "⚖️" },
+    { "id": "burnout", "name": "燃尽自己", "icon": "🔥" },
+    { "id": "perfect", "name": "满级毕业", "icon": "👑" },
+    { "id": "alljobs", "name": "三岗通吃", "icon": "🎯" }
+  ]
+}
+</script>
+
+<script>
+/* =========================================================
+   配置数据
+   ========================================================= */
+const POINTS_PER_SEM = 12;
+const SEMESTERS = 8;
+const BURNOUT = 92;
+
+const BUCKETS = [
+  { key:'hard',   name:'硬技能', icon:'🧠', color:'#4aa8ff', max:100, desc:'算法 / 编码 / 专业课' },
+  { key:'soft',   name:'软技能', icon:'🗣️', color:'#b07cff', max:100, desc:'表达 / 沟通 / 协作' },
+  { key:'proj',   name:'项目',   icon:'🛠️', color:'#ffb347', max:60,  desc:'作品集 · 复利引擎' },
+  { key:'intern', name:'实习',   icon:'💼', color:'#42d392', max:60,  desc:'受项目经验加成' },
+  { key:'rest',   name:'休息',   icon:'😴', color:'#4fd6d6', max:99,  desc:'恢复疲劳 · 保住效率' }
+];
+
+const JOBS = [
+  {
+    id:'backend', icon:'🖥️', name:'后端开发工程师', tag:'技术深度路线',
+    weights:{hard:0.42, soft:0.10, proj:0.26, intern:0.22},
+    target:60, reqs:[],
+    tip:'硬技能与项目是敲门砖，实习把作品变成履历。'
+  },
+  {
+    id:'data', icon:'📊', name:'数据分析师', tag:'技术 + 业务路线',
+    weights:{hard:0.38, soft:0.22, proj:0.22, intern:0.18},
+    target:60, reqs:[{ key:'proj', val:22, label:'项目经验 ≥ 22' }],
+    tip:'技术要硬，表达也要能讲清结论；没有项目作品，简历会很空。'
+  },
+  {
+    id:'pm', icon:'🧭', name:'产品经理', tag:'沟通与洞察路线',
+    weights:{hard:0.18, soft:0.42, proj:0.22, intern:0.18},
+    target:58,
+    reqs:[{ key:'soft', val:55, label:'软技能 ≥ 55' }, { key:'intern', val:25, label:'实习 ≥ 25' }],
+    tip:'软技能权重最高；但完全不懂技术、没有实习，面试同样过不去。'
+  }
+];
+
+const EVENTS = [
+  {
+    id:'mentor', icon:'🧪', title:'导师邀请你进课题组',
+    text:'导师问：要不要来实验室做点真项目？每周至少去两次。',
+    choices:[
+      { label:'加入，做真项目', fx:{ proj:8, fatigue:7 }, res:'你学会了读论文、跑实验、用 Git 协作。项目经验 +8，但通勤和熬夜让你更累。' },
+      { label:'先观望，专注课内', fx:{ hard:2, fatigue:-3 }, res:'你把时间投给课程和算法。硬技能 +2，疲劳 −3。' }
+    ]
+  },
+  {
+    id:'club', icon:'🎤', title:'社团招新，缺一个活动负责人',
+    text:'学长说：这活儿累，但真的很锻炼人。',
+    choices:[
+      { label:'接任负责人', fx:{ soft:9, fatigue:6 }, res:'你组织了 200 人的活动，学会了排期、协调和救火。软技能 +9。' },
+      { label:'当个普通成员', fx:{ soft:3, fatigue:1 }, res:'你按时参加例会，认识了几个人。软技能 +3。' }
+    ]
+  },
+  {
+    id:'intern', icon:'💼', title:'大厂暑期实习开始面试',
+    text:'简历投出去了，接下来两周要准备技术面和 HR 面。',
+    choices:[
+      { label:'全力准备，冲一把', fx:{ intern:13, fatigue:9 }, check:{ key:'proj', val:15 }, res:'你的项目作品打动了面试官，聊了 40 分钟。实习 +13！', resFail:'项目经历太单薄，一面被问穿。但你复盘了表达方式，软技能 +1。', fxFail:{ fatigue:8, soft:1 } },
+      { label:'这次先放弃', fx:{ fatigue:-3 }, res:'你把精力留给课业，少睡了两天补觉。疲劳 −3。' }
+    ]
+  },
+  {
+    id:'hackathon', icon:'🏆', title:'48 小时黑客松报名开始',
+    text:'组队做一个能跑起来的 Demo，通宵是标配。',
+    choices:[
+      { label:'组队参赛', fx:{ proj:10, soft:4, fatigue:10 }, res:'两天只睡了 6 小时，但你做出了第一个完整作品。项目 +10，软技能 +4。' },
+      { label:'围观学习', fx:{ hard:3, fatigue:1 }, res:'你看了别人的架构设计，做了一点技术笔记。硬技能 +3。' }
+    ]
+  },
+  {
+    id:'sick', icon:'🤒', title:'重感冒，烧到 38.5℃',
+    text:'明天还有一门期中测验。',
+    choices:[
+      { label:'硬扛，继续刷题', fx:{ hard:5, fatigue:11 }, res:'你靠咖啡撑过去了，硬技能 +5，但身体发出了严重警告。' },
+      { label:'请两天假休息', fx:{ fatigue:-9, hard:-1 }, res:'你补了两天觉，恢复了体力，但落下一节课。疲劳 −9。' }
+    ]
+  },
+  {
+    id:'ddl', icon:'📚', title:'三门课 DDL 撞在同一个星期',
+    text:'看得出来，这一周你会很痛苦。',
+    choices:[
+      { label:'熬夜全部赶完', fx:{ hard:6, fatigue:12 }, res:'你连着三天两点睡，作业全交了。硬技能 +6，疲劳大涨。' },
+      { label:'申请延期 + 找同学分工', fx:{ hard:2, soft:3, fatigue:3 }, res:'你学会了沟通和求助，事情办成了。硬技能 +2，软技能 +3。' }
+    ]
+  },
+  {
+    id:'gc', icon:'🎮', title:'室友喊你通宵开黑',
+    text:'"就一把，真的就一把。"',
+    choices:[
+      { label:'加入，放松一下', fx:{ fatigue:-7, soft:3, hard:-2 }, res:'你笑到肚子疼，宿舍关系更铁了。疲劳 −7，软技能 +3，但手感有点生。' },
+      { label:'早睡，明天再战', fx:{ fatigue:-4, hard:1 }, res:'你 23 点就寝，第二天早上刷了两道题。疲劳 −4，硬技能 +1。' }
+    ]
+  },
+  {
+    id:'leetcode', icon:'⚔️', title:'LeetCode 周赛开赛',
+    text:'每周一场，上榜需要投入两小时。',
+    choices:[
+      { label:'认真打比赛', fx:{ hard:6, fatigue:5 }, res:'你做出三题，排名进了前 20%。硬技能 +6。' },
+      { label:'赛后看题解复盘', fx:{ hard:3, fatigue:1 }, res:'你整理了四种解题模板。硬技能 +3。' }
+    ]
+  },
+  {
+    id:'outsource', icon:'💰', title:'学长介绍了一个外包单',
+    text:'做一个后台管理系统，有报酬，但工期很紧。',
+    choices:[
+      { label:'接单，赚点钱也练手', fx:{ proj:10, soft:2, fatigue:9 }, check:{ key:'proj', val:20 }, res:'你独立交付了整个系统，甲方很满意。项目 +10，还学会了需求沟通。', resFail:'工期压得太紧，你交得很勉强，返工了三次。项目 +4，疲劳 +9。', fxFail:{ proj:4, fatigue:9 } },
+      { label:'婉拒，先把课内做扎实', fx:{ hard:2, fatigue:-2 }, res:'你把时间留给了课程和算法。硬技能 +2，疲劳 −2。' }
+    ]
+  },
+  {
+    id:'alumni', icon:'🤝', title:'校友群里出现一个内推机会',
+    text:'一家公司正在招实习生，需要主动联系学长。',
+    choices:[
+      { label:'主动联系并准备简历', fx:{ intern:9, soft:4, fatigue:5 }, res:'学长帮你内推，你顺利进了二面。实习 +9，软技能 +4。' },
+      { label:'先攒够作品再说', fx:{ proj:4, fatigue:2 }, res:'你决定先完善作品集。项目 +4。' }
+    ]
+  },
+  {
+    id:'speech', icon:'🎙️', title:'课堂 presentation 抽签抽到你',
+    text:'下周上台讲 15 分钟，全班都在看。',
+    choices:[
+      { label:'认真准备 20 页 PPT', fx:{ soft:7, fatigue:6 }, res:'你讲得条理清晰，老师点名表扬。软技能 +7。' },
+      { label:'临场发挥', fx:{ soft:2, fatigue:2 }, res:'你磕磕绊绊讲完了，至少没冷场。软技能 +2。' }
+    ]
+  }
+];
+
+const ACHIEVEMENTS = [
+  { id:'first',    icon:'🌱', name:'迈出第一步', desc:'完成第一次学期结算' },
+  { id:'clear1',   icon:'🏁', name:'冲线成功',   desc:'任意岗位通关' },
+  { id:'fresh',    icon:'😌', name:'稳如老狗',   desc:'通关时疲劳低于 40' },
+  { id:'compound', icon:'📈', name:'复利大师',   desc:'毕业时项目 ≥ 40 且实习 ≥ 30' },
+  { id:'balance',  icon:'⚖️', name:'全能选手',   desc:'毕业时硬技能与软技能都 ≥ 60' },
+  { id:'burnout',  icon:'🔥', name:'燃尽自己',   desc:'体验一次崩盘（疲劳 ≥ 92）' },
+  { id:'perfect',  icon:'👑', name:'满级毕业',   desc:'就绪度达到 85 以上' },
+  { id:'alljobs',  icon:'🎯', name:'三岗通吃',   desc:'三个岗位全部通关' }
+];
+
+/* =========================================================
+   状态
+   ========================================================= */
+let S = null;
+let alloc = { hard:0, soft:0, proj:0, intern:0, rest:0 };
+let gameActive = false;
+let busy = false;
+let selectedJob = 'backend';
+let currentEvent = null;
+let currentEventCb = null;
+let actx = null;
+let save = { achievements:{}, best:{}, cleared:{} };
+
+/* =========================================================
+   工具
+   ========================================================= */
+function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+function allocTotal(){ return alloc.hard + alloc.soft + alloc.proj + alloc.intern + alloc.rest; }
+
+function beep(freq, dur, type){
+  try{
+    if(!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    if(actx.state === 'suspended') actx.resume();
+    const o = actx.createOscillator();
+    const g = actx.createGain();
+    o.type = type || 'sine';
+    o.frequency.value = freq;
+    g.gain.value = 0.035;
+    o.connect(g); g.connect(actx.destination);
+    o.start();
+    g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + (dur || 0.1));
+    o.stop(actx.currentTime + (dur || 0.1) + 0.02);
+  }catch(e){}
+}
+
+function toast(text, icon, isAch){
+  const t = document.createElement('div');
+  t.className = 'toast' + (isAch ? ' ach' : '');
+  t.innerHTML = '<span class="toast-ico">' + (icon || '✨') + '</span><span>' + text + '</span>';
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(function(){
+    t.classList.add('out');
+    setTimeout(function(){ t.remove(); }, 420);
+  }, 2700);
+}
+
+/* =========================================================
+   存档
+   ========================================================= */
+function loadSave(){
+  try{
+    const raw = localStorage.getItem('eac_save_v1');
+    if(raw){
+      const p = JSON.parse(raw);
+      save = Object.assign(save, p);
+    }
+  }catch(e){}
+  if(!save.achievements) save.achievements = {};
+  if(!save.best) save.best = {};
+  if(!save.cleared) save.cleared = {};
+}
+function persist(){
+  try{ localStorage.setItem('eac_save_v1', JSON.stringify(save)); }catch(e){}
+}
+function unlockAch(id){
+  if(save.achievements[id]) return;
+  save.achievements[id] = true;
+  persist();
+  const a = ACHIEVEMENTS.find(function(x){ return x.id === id; });
+  if(a){ toast(a.name + ' · ' + a.desc, a.icon, true); beep(880, 0.12, 'triangle'); }
+}
+
+/* =========================================================
+   就绪度计算
+   ========================================================= */
+function computeReadiness(s){
+  const w = s.job.weights;
+  const h  = Math.min(s.hard, 100) / 100;
+  const so = Math.min(s.soft, 100) / 100;
+  const p  = Math.min(s.proj, 60) / 60;
+  const i  = Math.min(s.intern, 60) / 60;
+  return (h * w.hard + so * w.soft + p * w.proj + i * w.intern) * 100;
+}
+
+function fatigueDeltaFor(a){
+  const work = a.hard + a.soft + a.proj + a.intern;
+  const strain = work - a.rest * 2.2;
+  return strain > 0 ? strain * 1.7 - 3 : strain * 1.0 - 3;
+}
+
+/* =========================================================
+   开始界面
+   ========================================================= */
+function renderJobList(){
+  const el = document.getElementById('job-list');
+  el.innerHTML = JOBS.map(function(j){
+    const best = save.best[j.id];
+    const cleared = save.cleared[j.id];
+    return '<div class="job ' + (selectedJob === j.id ? 'sel' : '') + '" id="job-' + j.id + '" onclick="selectJob(\'' + j.id + '\')">' +
+      '<div class="job-top"><span class="job-ico">' + j.icon + '</span><span class="job-name">' + j.name + '</span>' +
+      (cleared ? '<span class="job-clear">已通关</span>' : '') + '</div>' +
+      '<div class="job-tag">' + j.tag + '</div>' +
+      '<div class="job-meta">目标就绪度 ' + j.target + (best ? ' · 最高 ' + best.toFixed(1) : '') + '</div>' +
+      '<div class="job-tip">' + j.tip + '</div>' +
+      '</div>';
+  }).join('');
+}
+
+function selectJob(id){
+  selectedJob = id;
+  renderJobList();
+  beep(520, 0.05);
+}
+
+/* =========================================================
+   游戏启动
+   ========================================================= */
+function startGame(){
+  const job = JOBS.find(function(j){ return j.id === selectedJob; }) || JOBS[0];
+  S = {
+    job: job,
+    semester: 1,
+    hard: 0, soft: 0, proj: 0, intern: 0,
+    fatigue: 10,
+    history: [],
+    usedEvents: []
+  };
+  alloc = { hard:0, soft:0, proj:0, intern:0, rest:0 };
+  busy = false;
+  gameActive = true;
+
+  document.getElementById('start-screen').classList.add('hidden');
+  document.getElementById('game-screen').classList.remove('hidden');
+  document.getElementById('overlay').classList.add('hidden');
+
+  buildBuckets();
+  updateUI();
+  drawTrend();
+  toast('目标：' + job.name + ' · 就绪度 ≥ ' + job.target, '🎯');
+  beep(660, 0.09, 'triangle');
+}
+
+function backToStart(){
+  hideOverlay();
+  gameActive = false;
+  busy = false;
+  document.getElementById('start-screen').classList.remove('hidden');
+  document.getElementById('game-screen').classList.add('hidden');
+  renderJobList();
+}
+
+function restartSame(){
+  hideOverlay();
+  const id = S ? S.job.id : selectedJob;
+  selectedJob = id;
+  startGame();
+}
+
+/* =========================================================
+   分配界面
+   ========================================================= */
+function buildBuckets(){
+  const el = document.getElementById('buckets');
+  el.innerHTML = BUCKETS.map(function(b){
+    const label = (b.key === 'rest') ? '疲劳' : '当前';
+    return '<div class="bucket" id="bk-' + b.key + '" data-var="' + b.key + '" style="--c:' + b.color + '" onclick="addPoint(\'' + b.key + '\')">' +
+      '<div class="b-top"><span class="b-ico">' + b.icon + '</span><span class="b-name">' + b.name + '</span>' +
+      '<span class="b-count" id="cnt-' + b.key + '">0</span></div>' +
+      '<div class="b-desc">' + b.desc + '</div>' +
+      '<div class="b-stat"><span>' + label + '</span><b id="stat-' + b.key + '">0</b></div>' +
+      '<div class="mini"><i id="mini-' + b.key + '"></i></div>' +
+      '<div class="b-ctrl">' +
+        '<button class="pm" onclick="event.stopPropagation();removePoint(\'' + b.key + '\')" aria-label="减少">−</button>' +
+        '<button class="pm plus" onclick="event.stopPropagation();addPoint(\'' + b.key + '\')" aria-label="增加">+</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function addPoint(key){
+  if(!S || !gameActive || busy) return;
+  if(allocTotal() >= POINTS_PER_SEM){
+    beep(180, 0.09, 'square');
+    const p = document.getElementById('preview');
+    if(p){ p.classList.add('shake'); }
+    return;
+  }
+  alloc[key]++;
+  updateUI();
+  const el = document.getElementById('cnt-' + key);
+  if(el){
+    el.classList.remove('pop');
+    void el.offsetWidth;
+    el.classList.add('pop');
+  }
+  beep(640, 0.035);
+}
+
+function removePoint(key){
+  if(!S || !gameActive || busy) return;
+  if(alloc[key] <= 0) return;
+  alloc[key]--;
+  updateUI();
+  beep(420, 0.035);
+}
+
+function clearAlloc(){
+  if(!S || !gameActive || busy) return;
+  alloc = { hard:0, soft:0, proj:0, intern:0, rest:0 };
+  updateUI();
+  beep(320, 0.06);
+}
+
+function autoBalance(){
+  if(!S || !gameActive || busy) return;
+  alloc = { hard:3, soft:2, proj:2, intern:2, rest:3 };
+  updateUI();
+  beep(560, 0.06);
+}
+
+/* =========================================================
+   UI 刷新
+   ========================================================= */
+function updateUI(){
+  if(!S) return;
+  const left = POINTS_PER_SEM - allocTotal();
+
+  document.getElementById('energy-left').textContent = left;
+
+  let chips = '';
+  for(let i = 0; i < POINTS_PER_SEM; i++){
+    chips += '<span class="chip' + (i < left ? ' on' : '') + '"></span>';
+  }
+  document.getElementById('chips').innerHTML = chips;
+
+  // 卡片
+  BUCKETS.forEach(function(b){
+    const cnt = document.getElementById('cnt-' + b.key);
+    if(cnt) cnt.textContent = alloc[b.key];
+
+    const mi = document.getElementById('mini-' + b.key);
+    const st = document.getElementById('stat-' + b.key);
+    if(b.key === 'rest'){
+      if(st) st.textContent = Math.round(S.fatigue) + '%';
+      if(mi){
+        mi.style.width = S.fatigue + '%';
+        mi.style.background = S.fatigue >= 70 ? 'linear-gradient(90deg,#ffb347,#ff5f7a)' : '#4fd6d6';
+      }
+    }else{
+      const maxv = (b.key === 'hard' || b.key === 'soft') ? 100 : 60;
+      if(st) st.textContent = Math.round(S[b.key]);
+      if(mi){
+        mi.style.width = Math.min(100, S[b.key] / maxv * 100) + '%';
+        mi.style.background = b.color;
+      }
+    }
+
+    const card = document.getElementById('bk-' + b.key);
+    if(card) card.classList.toggle('active', alloc[b.key] > 0);
+  });
+
+  // 就绪度
+  const r = computeReadiness(S);
+  document.getElementById('ready-val').textContent = r.toFixed(1);
+  document.getElementById('target-val').textContent = S.job.target;
+  document.getElementById('bar-ready').style.width = Math.min(100, r) + '%';
+  document.getElementById('target-mark').style.left = Math.min(100, S.job.target) + '%';
+
+  // 疲劳
+  document.getElementById('fatigue-val').textContent = Math.round(S.fatigue);
+  document.getElementById('hud-fatigue').textContent = Math.round(S.fatigue) + '%';
+  const fb = document.getElementById('bar-fatigue');
+  fb.style.width = S.fatigue + '%';
+  fb.classList.toggle('danger', S.fatigue >= 70);
+
+  document.getElementById('hud-sem').textContent = S.semester + ' / ' + SEMESTERS;
+  document.getElementById('hud-job').textContent = S.job.icon + ' ' + S.job.name;
+
+  // 目标要求
+  let goalHtml = '<span class="gs-main">目标就绪度 ≥ ' + S.job.target + '</span>';
+  S.job.reqs.forEach(function(q){
+    const ok = S[q.key] >= q.val;
+    goalHtml += '<span class="' + (ok ? 'ok' : 'no') + '">' + (ok ? '✓' : '○') + ' ' + q.label + '</span>';
+  });
+  goalHtml += '<span class="' + (S.fatigue < BURNOUT ? 'ok' : 'no') + '">' + (S.fatigue < BURNOUT ? '✓' : '✗') + ' 疲劳 &lt; ' + BURNOUT + '</span>';
+  document.getElementById('goal-strip').innerHTML = goalHtml;
+
+  // 预览
+  const work = alloc.hard + alloc.soft + alloc.proj + alloc.intern;
+  const dF = fatigueDeltaFor(alloc);
+  const eff = Math.max(0.45, 1 - S.fatigue / 220);
+  const dFClass = dF > 6 ? 'bad' : (dF > 2 ? 'warn' : '');
+  document.getElementById('preview').innerHTML =
+    '<span>投入 <b>' + work + '</b> 点 · 休息 <b>' + alloc.rest + '</b> 点</span>' +
+    '<span class="' + dFClass + '">预计疲劳 ' + (dF >= 0 ? '+' : '') + dF.toFixed(1) + '</span>' +
+    '<span>效率系数 <b>×' + eff.toFixed(2) + '</b></span>';
+
+  // 按钮
+  const btn = document.getElementById('resolve-btn');
+  btn.disabled = left > 0;
+  btn.textContent = left > 0 ? ('还要分配 ' + left + ' 点') : '结算本学期 →';
+}
+
+/* =========================================================
+   轨迹图
+   ========================================================= */
+function drawTrend(){
+  const cv = document.getElementById('trend');
+  if(!cv || !S) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const padL = 10, padR = 10, padT = 20, padB = 20;
+  const yFor = function(v){
+    return H - padB - (clamp(v, 0, 100) / 100) * (H - padT - padB);
+  };
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+  ctx.lineWidth = 1;
+  [0, 25, 50, 75, 100].forEach(function(v){
+    ctx.beginPath();
+    ctx.moveTo(padL, yFor(v));
+    ctx.lineTo(W - padR, yFor(v));
+    ctx.stroke();
+  });
+
+  // 目标线
+  ctx.save();
+  ctx.setLineDash([6, 6]);
+  ctx.strokeStyle = 'rgba(255,179,71,0.85)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(padL, yFor(S.job.target));
+  ctx.lineTo(W - padR, yFor(S.job.target));
+  ctx.stroke();
+  ctx.restore();
+
+  const xFor = function(i){
+    return padL + (i / (SEMESTERS - 1)) * (W - padL - padR);
+  };
+
+  const pts = S.history.map(function(v, i){ return { x: xFor(i), y: yFor(v) }; });
+
+  if(pts.length){
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, H - padB);
+    pts.forEach(function(p){ ctx.lineTo(p.x, p.y); });
+    ctx.lineTo(pts[pts.length - 1].x, H - padB);
+    ctx.closePath();
+    const grad = ctx.createLinearGradient(0, padT, 0, H - padB);
+    grad.addColorStop(0, 'rgba(74,168,255,0.45)');
+    grad.addColorStop(1, 'rgba(74,168,255,0.02)');
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    ctx.beginPath();
+    pts.forEach(function(p, i){ i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y); });
+    ctx.strokeStyle = '#6fc3ff';
+    ctx.lineWidth = 2.5;
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+
+    pts.forEach(function(p){
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 3.6, 0, Math.PI * 2);
+      ctx.fillStyle = '#bfe4ff';
+      ctx.fill();
+    });
+  }
+
+  ctx.fillStyle = 'rgba(255,255,255,0.42)';
+  ctx.font = '11px sans-serif';
+  ctx.fillText('就绪度轨迹（虚线 = 目标线）', padL + 2, 13);
+}
+
+/* =========================================================
+   学期结算
+   ========================================================= */
+function resolveSemester(){
+  if(!S || !gameActive || busy) return;
+  if(allocTotal() < POINTS_PER_SEM) return;
+  busy = true;
+  beep(520, 0.08, 'triangle');
+
+  if(Math.random() < 0.7){
+    showEvent(doResolve);
+  }else{
+    setTimeout(doResolve, 220);
+  }
+}
+
+function doResolve(){
+  const eff = Math.max(0.45, 1 - S.fatigue / 220);
+  const internFactor = Math.min(1, 0.5 + S.proj / 40);
+  const g = {
+    hard:   alloc.hard * 3.8 * eff,
+    soft:   alloc.soft * 3.4 * eff,
+    proj:   alloc.proj * 2.8 * eff,
+    intern: alloc.intern * 2.8 * eff * internFactor
+  };
+  const comp = {
+    hard: S.proj * 0.05 + S.intern * 0.06,
+    soft: S.proj * 0.06 + S.intern * 0.07
+  };
+
+  const work = alloc.hard + alloc.soft + alloc.proj + alloc.intern;
+  const dF = fatigueDeltaFor(alloc);
+
+  const beforeFatigue = S.fatigue;
+  const rBefore = computeReadiness(S);
+
+  // 实习效率提示
+  const internNote = (alloc.intern > 0 && internFactor < 1)
+    ? '<div class="res-warn">💼 项目经验只有 ' + Math.round(S.proj) + '，实习效率打了 ' + Math.round(internFactor * 100) + ' 折。先有项目，实习才接得住。</div>'
+    : '';
+
+  S.hard   = Math.min(100, S.hard + g.hard + comp.hard);
+  S.soft   = Math.min(100, S.soft + g.soft + comp.soft);
+  S.proj   = Math.min(60,  S.proj + g.proj);
+  S.intern = Math.min(60,  S.intern + g.intern);
+  S.fatigue = clamp(S.fatigue + dF, 0, 100);
+
+  const rAfter = computeReadiness(S);
+  S.history.push(rAfter);
+
+  updateUI();
+  drawTrend();
+
+  if(S.semester === 1) unlockAch('first');
+
+  function row(icon, label, base, cm, after, delay){
+    const total = base + cm;
+    let compTag = (cm > 0.05) ? '<span class="rr-comp">含复利 +' + cm.toFixed(1) + '</span>' : '';
+    return '<div class="res-row" style="animation-delay:' + delay + 's">' +
+      '<span class="rr-ico">' + icon + '</span>' +
+      '<span class="rr-label">' + label + '</span>' +
+      '<span class="rr-gain">+' + total.toFixed(1) + '</span>' +
+      '<span class="rr-arrow">→</span>' +
+      '<span class="rr-after">' + after.toFixed(1) + '</span>' +
+      compTag +
+    '</div>';
+  }
+
+  let html = '';
+  html += '<div class="res-head">';
+  html += '<div class="res-kicker">第 ' + S.semester + ' 学期结算</div>';
+  html += '<div class="res-title">效率系数 ×' + eff.toFixed(2) + '</div>';
+  html += '<div class="res-sub">疲劳 ' + Math.round(beforeFatigue) + ' 时，每 1 点精力只能产出 ' + Math.round(eff * 100) + '% 的效果</div>';
+  html += '</div>';
+
+  html += '<div class="res-list">';
+  html += row('🧠', '硬技能', g.hard, comp.hard, S.hard, 0);
+  html += row('🗣️', '软技能', g.soft, comp.soft, S.soft, 0.06);
+  html += row('🛠️', '项目',   g.proj, 0, S.proj, 0.12);
+  html += row('💼', '实习',   g.intern, 0, S.intern, 0.18);
+  html += '<div class="res-row" style="animation-delay:.24s">' +
+    '<span class="rr-ico">😴</span><span class="rr-label">疲劳</span>' +
+    '<span class="rr-gain ' + (dF > 0 ? 'bad' : '') + '">' + (dF >= 0 ? '+' : '') + dF.toFixed(1) + '</span>' +
+    '<span class="rr-arrow">→</span><span class="rr-after">' + S.fatigue.toFixed(1) + '</span>' +
+    '<span class="rr-comp">投入 ' + work + ' · 休息 ' + alloc.rest + '</span></div>';
+  html += '</div>';
+
+  html += '<div class="res-foot"><span>就绪度</span><b>' + rBefore.toFixed(1) + ' → ' + rAfter.toFixed(1) + '</b>' +
+          '<span class="res-target">（目标 ' + S.job.target + '）</span></div>';
+
+  html += internNote;
+
+  if(eff < 0.78){
+    html += '<p class="res-warn">⚠️ 疲劳正在拖垮你的效率。下学期多留一点休息，产出反而更高。</p>';
+  }
+
+  const btnText = (S.semester >= SEMESTERS) ? '查看毕业结果 →' : ('进入第 ' + (S.semester + 1) + ' 学期 →');
+  html += '<button class="btn primary" onclick="afterResolve()">' + btnText + '</button>';
+
+  showOverlay(html);
+  beep(700, 0.1, 'triangle');
+}
+
+function afterResolve(){
+  hideOverlay();
+  if(S.fatigue >= BURNOUT){ burnOut(); return; }
+  if(S.semester >= SEMESTERS){ finishGame(); return; }
+  S.semester++;
+  alloc = { hard:0, soft:0, proj:0, intern:0, rest:0 };
+  busy = false;
+  updateUI();
+  beep(600, 0.06);
+}
+
+/* =========================================================
+   事件
+   ========================================================= */
+function showEvent(cb){
+  const pool = EVENTS.filter(function(e){ return S.usedEvents.indexOf(e.id) === -1; });
+  const ev = pool.length
+    ? pool[Math.floor(Math.random() * pool.length)]
+    : EVENTS[Math.floor(Math.random() * EVENTS.length)];
+
+  S.usedEvents.push(ev.id);
+  currentEvent = ev;
+  currentEventCb = cb;
+
+  let html = '<div class="ev-head"><span class="ev-icon">' + ev.icon + '</span>' +
+    '<div><div class="ev-kicker">第 ' + S.semester + ' 学期 · 突发事件</div>' +
+    '<div class="ev-title">' + ev.title + '</div></div></div>';
+  html += '<p class="ev-text">' + ev.text + '</p>';
+  html += '<div class="ev-choices">';
+  ev.choices.forEach(function(c, i){
+    html += '<button class="btn choice" onclick="chooseEvent(' + i + ')">' + c.label + '</button>';
+  });
+  html += '</div>';
+
+  showOverlay(html);
+  beep(480, 0.09, 'sawtooth');
+}
+
+function fxChips(fx){
+  const map = [
+    ['hard', '🧠 硬技能'], ['soft', '🗣️ 软技能'],
+    ['proj', '🛠️ 项目'],   ['intern', '💼 实习'],
+    ['fatigue', '😴 疲劳']
+  ];
+  let out = '';
+  map.forEach(function(p){
+    const v = fx[p[0]];
+    if(v){
+      const cls = (p[0] === 'fatigue') ? (v > 0 ? 'down' : 'up') : (v > 0 ? 'up' : 'down');
+      out += '<span class="fx-chip ' + cls + '">' + p[1] + ' ' + (v > 0 ? '+' : '') + v + '</span>';
+    }
+  });
+  return out;
+}
+
+function applyFx(fx){
+  if(!fx) return;
+  S.hard   = clamp(S.hard   + (fx.hard   || 0), 0, 100);
+  S.soft   = clamp(S.soft   + (fx.soft   || 0), 0, 100);
+  S.proj   = clamp(S.proj   + (fx.proj   || 0), 0, 60);
+  S.intern = clamp(S.intern + (fx.intern || 0), 0, 60);
+  S.fatigue = clamp(S.fatigue + (fx.fatigue || 0), 0, 100);
+}
+
+function chooseEvent(i){
+  const ev = currentEvent;
+  const c = ev.choices[i];
+  let usedFx = c.fx;
+  let usedRes = c.res;
+
+  // 条件分支
+  if(c.check){
+    const ok = S[c.check.key] >= c.check.val;
+    if(!ok){
+      usedFx = c.fxFail || c.fx;
+      usedRes = c.resFail || c.res;
+    }
+  }
+
+  applyFx(usedFx);
+  updateUI();
+  beep(usedFx && (usedFx.fatigue || 0) > 5 ? 300 : 620, 0.1);
+
+  let html = '<div class="ev-head"><span class="ev-icon">' + ev.icon + '</span>' +
+    '<div><div class="ev-kicker">你的选择</div>' +
+    '<div class="ev-title">' + c.label + '</div></div></div>';
+  html += '<p class="ev-text">' + usedRes + '</p>';
+  html += '<div class="fx-row">' + fxChips(usedFx) + '</div>';
+  html += '<button class="btn primary" onclick="continueAfterEvent()">继续本学期 →</button>';
+
+  showOverlay(html);
+}
+
+function continueAfterEvent(){
+  hideOverlay();
+  if(S.fatigue >= BURNOUT){ burnOut(); return; }
+  if(typeof currentEventCb === 'function') currentEventCb();
+}
+
+/* =========================================================
+   Overlay
+   ========================================================= */
+function showOverlay(html){
+  document.getElementById('overlay-content').innerHTML = html;
+  document.getElementById('overlay').classList.remove('hidden');
+}
+function hideOverlay(){
+  document.getElementById('overlay').classList.add('hidden');
+}
+
+/* =========================================================
+   结局
+   ========================================================= */
+function statsHtml(){
+  return '<div class="end-stats">' +
+    '<div class="es"><span>🧠 硬技能</span><b>' + Math.round(S.hard) + '</b></div>' +
+    '<div class="es"><span>🗣️ 软技能</span><b>' + Math.round(S.soft) + '</b></div>' +
+    '<div class="es"><span>🛠️ 项目</span><b>' + Math.round(S.proj) + '</b></div>' +
+    '<div class="es"><span>💼 实习</span><b>' + Math.round(S.intern) + '</b></div>' +
+    '<div class="es"><span>😴 疲劳</span><b>' + Math.round(S.fatigue) + '%</b></div>' +
+    '<div class="es"><span>📈 就绪度</span><b>' + computeReadiness(S).toFixed(1) + '</b></div>' +
+  '</div>';
+}
+
+function burnOut(){
+  gameActive = false;
+  busy = false;
+  unlockAch('burnout');
+  hideOverlay();
+  S.history.push(computeReadiness(S));
+  drawTrend();
+
+  let html = '<div class="end-head lose">' +
+    '<div class="end-emoji">🔥</div>' +
+    '<h2>崩盘了</h2>' +
+    '<p class="end-sub">第 ' + S.semester + ' 学期，疲劳值冲到 <b>' + Math.round(S.fatigue) + '</b>。<br>你倒在了毕业之前。</p>' +
+  '</div>';
+  html += statsHtml();
+  html += '<p class="res-warn">长期把休息投成 0 点，产出的边际效益会一路下滑：疲劳越高，每一点精力的效率越低。这是个人发展计划（IDP）里最常见的失败模式——不是不努力，而是没有留出恢复的余量。</p>';
+  html += '<div class="end-btns">' +
+    '<button class="btn primary" onclick="restartSame()">重新规划</button>' +
+    '<button class="btn ghost" onclick="backToStart()">换个岗位</button>' +
+  '</div>';
+  showOverlay(html);
+  beep(160, 0.4, 'sawtooth');
+}
+
+function finishGame(){
+  gameActive = false;
+  busy = false;
+  hideOverlay();
+
+  const job = S.job;
+  const r = computeReadiness(S);
+  const reqOk = job.reqs.map(function(q){
+    return { label:q.label, ok: S[q.key] >= q.val };
+  });
+  const passed = (r >= job.target) && reqOk.every(function(q){ return q.ok; });
+
+  let stars = 0;
+  if(passed){
+    stars = 1;
+    if(r >= job.target + 6) stars++;
+    if(r >= job.target + 12) stars++;
+  }
+
+  // 记录
+  if(!save.best[job.id] || r > save.best[job.id]) save.best[job.id] = r;
+  if(passed) save.cleared[job.id] = true;
+  persist();
+
+  // 成就
+  if(passed) unlockAch('clear1');
+  if(passed && S.fatigue < 40) unlockAch('fresh');
+  if(S.proj >= 40 && S.intern >= 30) unlockAch('compound');
+  if(S.hard >= 60 && S.soft >= 60) unlockAch('balance');
+  if(r >= 85) unlockAch('perfect');
+  if(JOBS.every(function(j){ return save.cleared[j.id]; })) unlockAch('alljobs');
+
+  const starStr = '★★★'.slice(0, stars) + '☆☆☆'.slice(0, 3 - stars);
+
+  let html = '<div class="end-head ' + (passed ? 'win' : 'lose') + '">';
+  html += '<div class="end-emoji">' + (passed ? '🎉' : '😵') + '</div>';
+  html += '<h2>' + (passed ? '冲线成功！' : '未能达标') + '</h2>';
+  html += '<div class="stars" style="color:' + (passed ? '#ffd166' : '#5c6a8c') + '">' + starStr + '</div>';
+  html += '<p class="end-sub">' + job.icon + ' ' + job.name + ' · 毕业就绪度 <b>' + r.toFixed(1) + '</b> / 目标 ' + job.target + '</p>';
+  html += '</div>';
+
+  html += statsHtml();
+
+  html += '<div class="req-list">';
+  html += '<div class="req ' + (r >= job.target ? 'ok' : 'no') + '">' +
+    (r >= job.target ? '✓' : '✗') + ' 就绪度 ≥ ' + job.target + '（实际 ' + r.toFixed(1) + '）</div>';
+  reqOk.forEach(function(q){
+    html += '<div class="req ' + (q.ok ? 'ok' : 'no') + '">' + (q.ok ? '✓' : '✗') + ' ' + q.label + '</div>';
+  });
+  html += '<div class="req ' + (S.fatigue < BURNOUT ? 'ok' : 'no') + '">' +
+    (S.fatigue < BURNOUT ? '✓' : '✗') + ' 未崩盘（疲劳 ' + Math.round(S.fatigue) + '）</div>';
+  html += '</div>';
+
+  if(passed){
+    html += '<p class="res-warn" style="border-color:rgba(66,211,146,.35);background:rgba(66,211,146,.1);color:#9ff0c4;">' +
+      '复盘：你在这四年里做到了「投入 + 恢复」的平衡。<b>项目与实习越早启动，后面的复利越久</b>——这是你拿到高分的关键。</p>';
+  }else{
+    html += '<p class="res-warn">复盘：就绪度是四类能力的加权结果，单点堆满无法通关。' +
+      '试着让项目/实习更早启动（复利更久），同时每学期留 3 点以上休息维持效率。</p>';
+  }
+
+  html += '<div class="end-btns">' +
+    '<button class="btn primary" onclick="restartSame()">再玩一次</button>' +
+    '<button class="btn ghost" onclick="backToStart()">换个岗位</button>' +
+  '</div>';
+
+  showOverlay(html);
+
+  if(passed) beep(880, 0.18, 'triangle');
+  else beep(240, 0.3, 'sawtooth');
+}
+
+/* =========================================================
+   外部驱动接口（postMessage / SET_WIDGET_STATE）
+   ========================================================= */
+window.setGameParam = function(key, value){
+  if(!S) return;
+  if(['hard', 'soft', 'proj', 'intern', 'rest'].indexOf(key) !== -1){
+    const v = Math.max(0, Math.min(POINTS_PER_SEM, Math.round(Number(value) || 0)));
+    const others = allocTotal() - alloc[key];
+    alloc[key] = Math.max(0, Math.min(v, POINTS_PER_SEM - others));
+    updateUI();
+  }else if(key === 'fatigue'){
+    S.fatigue = clamp(Number(value) || 0, 0, 100);
+    updateUI();
+  }else if(key === 'semester'){
+    S.semester = Math.max(1, Math.min(SEMESTERS, Math.round(Number(value) || 1)));
+    updateUI();
+  }
+};
+
+window.addEventListener('message', function(event){
+  const data = event.data || {};
+  const type = data.type;
+  const target = data.target;
+  const state = data.state;
+  const content = data.content;
+
+  switch(type){
+    case 'SET_WIDGET_STATE':
+      if(state){
+        Object.keys(state).forEach(function(key){
+          const value = state[key];
+          const control = document.getElementById(key + '-slider') ||
+                          document.getElementById(key) ||
+                          document.querySelector('[data-var="' + key + '"]');
+          if(control){
+            if('value' in control) control.value = value;
+            control.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+          if(typeof window.setGameParam === 'function') window.setGameParam(key, value);
+        });
+      }
+      break;
+
+    case 'HIGHLIGHT_ELEMENT':
+      var hl = document.querySelector(target);
+      if(hl){
+        hl.style.outline = '3px solid rgba(139, 92, 246, 0.8)';
+        hl.style.outlineOffset = '4px';
+        hl.style.animation = 'pulse-highlight 2s infinite';
+        setTimeout(function(){
+          hl.style.outline = '';
+          hl.style.outlineOffset = '';
+          hl.style.animation = '';
+        }, 3000);
+      }
+      break;
+
+    case 'ANNOTATE_ELEMENT':
+      var an = document.querySelector(target);
+      if(an && content){
+        var rect = an.getBoundingClientRect();
+        var tip = document.createElement('div');
+        tip.className = 'teacher-annotation';
+        tip.style.cssText = 'position:fixed; top:' + Math.max(8, rect.top - 44) + 'px; left:' + rect.left + 'px; background:rgba(139,92,246,0.95); color:white; padding:8px 12px; border-radius:8px; font-size:13px; z-index:1000; animation:fadeIn 0.3s; max-width:260px;';
+        tip.textContent = content;
+        document.body.appendChild(tip);
+        setTimeout(function(){ tip.remove(); }, 4000);
+      }
+      break;
+
+    case 'REVEAL_ELEMENT':
+      var rv = document.querySelector(target);
+      if(rv){
+        rv.style.display = '';
+        rv.style.opacity = '1';
+      }
+      break;
+  }
+});
+
+(function(){
+  var st = document.createElement('style');
+  st.textContent = '@keyframes pulse-highlight{0%,100%{outline-color:rgba(139,92,246,0.8);}50%{outline-color:rgba(139,92,246,0.35);}}@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}';
+  document.head.appendChild(st);
+})();
+
+/* =========================================================
+   初始化
+   ========================================================= */
+document.addEventListener('DOMContentLoaded', function(){
+  loadSave();
+  renderJobList();
+
+  // 防止双击缩放
+  document.addEventListener('dblclick', function(e){ e.preventDefault(); }, { passive:false });
+
+  // 键盘快捷键：数字 1-5 加一点，Q W E R T 减一点
+  document.addEventListener('keydown', function(e){
+    if(!S || !gameActive || busy) return;
+    const addMap = { '1':'hard', '2':'soft', '3':'proj', '4':'intern', '5':'rest' };
+    const subMap = { 'q':'hard', 'w':'soft', 'e':'proj', 'r':'intern', 't':'rest' };
+    const k = e.key.toLowerCase();
+    if(addMap[k]) addPoint(addMap[k]);
+    else if(subMap[k]) removePoint(subMap[k]);
+    else if(k === 'enter' && !document.getElementById('resolve-btn').disabled) resolveSemester();
+  });
+});
+</script>
+</body>
+</html>
