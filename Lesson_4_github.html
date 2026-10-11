@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>职业规划与工程素养·第4课（对外公开版）</title>
+<style>
+  :root {
+    --color-primary: #4a90c2;
+    --color-primary-deep: #2f5597;
+    --color-primary-dark: #1f3a5f;
+    --color-primary-mid: #5b9bd5;
+    --color-primary-bright: #1d4ed8;
+    --color-primary-card: #1e40af;
+    --bg-blue-50: #f0f7ff;
+    --bg-blue-100: #e3eefc;
+    --bg-blue-200: #eaf1fb;
+    --bg-blue-300: #dbeafe;
+    --bg-blue-400: #eff6ff;
+    --bg-blue-500: #cbdff2;
+    --bg-blue-600: #9ec7e8;
+    --bg-page: #f0f0f3;
+    --bg-slide: #ffffff;
+    --bg-gray-50: #f8fafc;
+    --bg-gray-100: #f8f9fb;
+    --text-primary: #333333;
+    --text-secondary: #444444;
+    --text-muted: #64748b;
+    --text-gray: #94a3b8;
+    --border-light: #e5e7eb;
+    --border-default: #cccccc;
+    --border-table: #dddddd;
+    --color-success-text: #166534;
+    --color-success-deep: #14532d;
+    --bg-success-100: #dcfce7;
+    --bg-success-50: #f0fdf4;
+    --color-danger-text: #991b1b;
+    --color-danger-deep: #7f1d1d;
+    --bg-danger-100: #fee2e2;
+    --bg-danger-50: #fef2f2;
+    --color-warning-text: #92400e;
+    --bg-warning-100: #fef3c7;
+    --bg-warning-50: #fff7ed;
+    --color-purple-text: #5b21b6;
+    --bg-purple-50: #f5f3ff;
+    --color-purple: #8b5cf6;
+    --font-sans: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    --font-mono: "Consolas", "ui-monospace", "Menlo", monospace;
+  }
+  body { font-family: var(--font-sans); background: var(--bg-page); margin: 0; padding: 24px; color: var(--text-primary); }
+  .deck { max-width: 960px; margin: 0 auto; }
+  .slide { margin-bottom: 28px; }
+  .slide-caption { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+  .slide-stage {
+    position: relative; overflow: hidden; border-radius: 6px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.12); margin: 0 auto;
+    background: var(--bg-slide); width: 960px; min-height: 540px;
+    padding: 50px 60px 60px; box-sizing: border-box;
+  }
+  .obj-badge {
+    position: absolute; top: 12px; right: 20px;
+    background: var(--color-purple); color: #fff;
+    padding: 4px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; z-index: 10;
+  }
+  .slide-title { font-size: 30px; font-weight: 700; color: var(--color-primary-dark); margin: 0 0 8px; line-height: 1.4; }
+  .title-divider { width: 100%; height: 3px; background: var(--color-primary); margin-bottom: 22px; }
+  .title-divider.thick { height: 4px; background: var(--color-primary-deep); }
+  .section-title { font-size: 20px; font-weight: 700; color: var(--color-primary-dark); margin: 0 0 14px; text-align: center; }
+  .card-row { display: flex; gap: 14px; margin-bottom: 12px; }
+  .card { flex: 1; padding: 10px 14px; border-radius: 4px; box-sizing: border-box; }
+  .card h3 { font-size: 17px; font-weight: 700; margin: 0 0 6px; text-align: center; }
+  .card p { margin: 0 0 4px; font-size: 13px; line-height: 1.6; }
+  .card.blue { background: var(--bg-blue-400); } .card.blue h3 { color: var(--color-primary-card); } .card.blue p { color: var(--text-secondary); }
+  .card.amber { background: var(--bg-warning-100); } .card.amber h3 { color: var(--color-warning-text); } .card.amber p { color: var(--text-secondary); }
+  .card.purple { background: var(--bg-purple-50); } .card.purple h3 { color: var(--color-purple-text); } .card.purple p { color: var(--text-secondary); }
+  .card.success { background: var(--bg-success-100); } .card.success h3 { color: var(--color-success-text); } .card.success p { color: var(--text-secondary); }
+  .card.danger { background: var(--bg-danger-100); } .card.danger h3 { color: var(--color-danger-text); } .card.danger p { color: var(--text-secondary); }
+  .data-table {
+    width: 100%; border-collapse: collapse; table-layout: fixed;
+    margin-bottom: 16px; border: 1px solid var(--border-default); border-radius: 4px; overflow: hidden;
+  }
+  .data-table th { background: var(--color-primary-deep); color: #fff; font-size: 14px; font-weight: 700; padding: 6px 6px; border: 1px solid var(--border-table); text-align: center; }
+  .data-table td { font-size: 13px; padding: 5px 6px; border: 1px solid var(--border-table); vertical-align: middle; word-break: break-word; color: var(--text-secondary); }
+  .data-table td.dim-col { background: var(--bg-blue-200); color: var(--color-primary-dark); font-weight: 700; text-align: center; }
+  .data-table td.highlight { color: var(--color-success-text); font-weight: 600; }
+  .step-list { margin-bottom: 16px; }
+  .step-item {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--bg-gray-50); border-left: 5px solid var(--color-primary-mid);
+    padding: 8px 18px; margin-bottom: 8px; min-height: 56px; box-sizing: border-box;
+  }
+  .step-num { width: 40px; height: 40px; background: var(--bg-blue-300); color: var(--color-primary-bright); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; flex-shrink: 0; }
+  .step-title { font-size: 17px; font-weight: 700; color: var(--text-primary); min-width: 150px; }
+  .step-desc { font-size: 13.5px; color: var(--text-secondary); flex: 1; line-height: 1.6; }
+  .alert { padding: 12px 18px; border-radius: 4px; margin-bottom: 14px; border-left: 6px solid; }
+  .alert p { margin: 0 0 4px; font-size: 14px; line-height: 1.6; }
+  .alert.danger { background: var(--bg-danger-50); border-color: var(--color-danger-bar); } .alert.danger p { color: var(--color-danger-deep); }
+  .alert.success { background: var(--bg-success-50); border-color: var(--color-success-text); } .alert.success p { color: var(--color-success-deep); }
+  .alert.warning { background: var(--bg-warning-50); border-color: var(--color-warning-mid); } .alert.warning p { color: var(--color-warning-text); }
+  .alert.info { background: var(--bg-blue-200); border-color: var(--color-primary); } .alert.info p { color: var(--color-primary-dark); }
+  .tag { display: inline-block; padding: 2px 10px; border-radius: 4px; font-size: 13px; font-weight: 600; background: var(--bg-blue-300); color: var(--color-primary-bright); margin-right: 6px; }
+  .summary-bar { background: var(--bg-blue-200); padding: 12px 18px; border-radius: 4px; margin-top: 14px; }
+  .summary-bar p { color: var(--color-primary-dark); font-size: 17px; font-weight: 600; margin: 0; line-height: 1.5; }
+  .cover-slide { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; min-height: 540px; padding-top: 20px; }
+  .cover-title { font-size: 42px; font-weight: 700; color: var(--color-primary-dark); margin: 0 0 14px; line-height: 1.4; }
+  .cover-subtitle { font-size: 22px; color: var(--text-muted); margin: 0 0 34px; font-weight: 400; }
+  .cover-meta { font-size: 15px; color: var(--text-secondary); line-height: 2; }
+  .level-map { display: flex; flex-direction: column; gap: 8px; }
+  .level-row { display: flex; align-items: center; gap: 12px; background: var(--bg-blue-50); border-radius: 4px; padding: 8px 14px; border-left: 5px solid var(--color-primary); }
+  .level-no { width: 34px; height: 34px; background: var(--color-primary); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; flex-shrink: 0; }
+  .level-name { font-size: 16px; font-weight: 700; color: var(--color-primary-dark); min-width: 210px; }
+  .level-act { font-size: 13.5px; color: var(--text-secondary); flex: 1; line-height: 1.5; }
+  .level-time { font-size: 13px; color: var(--color-purple-text); font-weight: 700; white-space: nowrap; }
+  .tab-bar { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .tab-btn { border: 1px solid var(--color-primary-mid); background: #fff; color: var(--color-primary-dark); padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--font-sans); }
+  .tab-btn.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .flip-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 10px; }
+  .flip-card { width: auto; min-height: 104px; perspective: 800px; cursor: pointer; }
+  .flip-inner { position: relative; width: 100%; min-height: 104px; transition: transform .45s; transform-style: preserve-3d; }
+  .flip-card.open .flip-inner { transform: rotateY(180deg); }
+  .flip-face { position: absolute; width: 100%; min-height: 104px; backface-visibility: hidden; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 8px 6px; box-sizing: border-box; }
+  .flip-front { background: var(--bg-blue-100); color: var(--color-primary-dark); font-weight: 700; font-size: 15px; }
+  .flip-back { background: var(--bg-warning-100); color: var(--color-warning-text); transform: rotateY(180deg); font-size: 12px; line-height: 1.45; }
+  .reveal-wrap { margin-top: 8px; }
+  .reveal-btn { background: var(--color-primary); color: #fff; border: none; padding: 8px 18px; border-radius: 20px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: var(--font-sans); }
+  .reveal-content { display: none; margin-top: 10px; }
+  .reveal-wrap.open .reveal-content { display: block; }
+  .reveal-wrap.open .reveal-btn { display: none; }
+  .two-col { display: flex; gap: 26px; margin-bottom: 16px; }
+  .two-col .col { flex: 1; min-width: 0; }
+  .col-title { font-size: 17px; font-weight: 700; color: var(--color-primary-dark); margin: 0 0 10px; padding-bottom: 6px; border-bottom: 2px solid var(--color-primary-mid); }
+  .col-content ul { margin: 0; padding-left: 20px; font-size: 14.5px; line-height: 2; color: var(--text-secondary); }
+  .text-muted { color: var(--text-muted); }
+  .text-center { text-align: center; }
+  .mt-16 { margin-top: 16px; }
+  /* 五大支柱棋盘 */
+  .pillar-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 18px; }
+  .pillar-item { position: relative; text-align: center; padding: 14px 8px; border-radius: 6px; }
+  .pillar-item:not(:last-child)::after { content: '→'; position: absolute; right: -13px; top: 50%; transform: translateY(-50%); font-size: 22px; color: #4a90d9; font-weight: 700; z-index: 2; line-height: 1; }
+  .pillar-item .p-name { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .pillar-item .p-en { font-size: 12px; color: var(--text-muted); }
+  .pillar-item.locked { background: var(--bg-gray-100); color: var(--text-gray); }
+  .pillar-item.locked .p-name { color: var(--text-gray); }
+  .pillar-item.now { background: var(--bg-blue-100); }
+  .pillar-item.now .p-name { color: var(--color-primary-dark); }
+  .pillar-item.now .p-en { color: var(--color-primary-mid); }
+  /* 系统边界图 */
+  .sys-wrap { display: flex; gap: 20px; align-items: flex-start; }
+  .sys-box { flex: 0 0 430px; }
+  .sys-side { flex: 1; }
+  .case-card { background: var(--bg-gray-50); border: 1px solid var(--border-light); border-radius: 6px; padding: 10px 14px; margin-bottom: 10px; }
+  .case-card .c-title { font-size: 14px; font-weight: 700; color: var(--color-primary-dark); margin-bottom: 4px; }
+  .case-card p { margin: 0; font-size: 13px; line-height: 1.7; color: var(--text-secondary); }
+  .jump-link { display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; padding: 10px 18px; background: var(--color-primary-deep); color: #fff; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; font-family: var(--font-sans); box-shadow: 0 2px 6px rgba(31,58,95,.2); }
+  .jump-link:hover { background: var(--color-primary-dark); transform: translateY(-1px); }
+
+  /* 系统边界图下部两列 */
+  .sys-bottom { display: flex; gap: 16px; margin-top: 12px; }
+  .sys-col { flex: 1; min-width: 0; }
+</style>
+</head>
+<body>
+<div class="deck"><section class="slide">
+    <div class="slide-caption">第1页·封面</div>
+    <div class="slide-stage cover-slide">
+      <div class="cover-title">职业规划与工程素养</div>
+      <p class="cover-subtitle">第4课　工程素养五大支柱：系统思维与需求转化</p>
+      <p class="cover-meta">系统侦探事务所 · 先看清系统，再动手</p>
+    </div>
+  </section>
+<section class="slide">
+    <div class="slide-caption">第2页·闯关地图</div>
+    <div class="slide-stage">
+      <div class="obj-badge">闯关地图 · 90 分钟</div>
+      <h1 class="slide-title">本课闯关地图</h1>
+      <div class="title-divider"></div>
+      <div class="level-map">
+        <div class="level-row"><div class="level-no">1</div><div class="level-name">工程师修炼地图与悬念开场</div><div class="level-act">五大支柱棋盘 + 食堂排长队之谜</div><div class="level-time">10 分钟</div></div>
+        <div class="level-row"><div class="level-no">2</div><div class="level-name">系统侦探挑战</div><div class="level-act">抽校园场景任务卡，10 分钟画边界图</div><div class="level-time">25 分钟</div></div>
+        <div class="level-row"><div class="level-no">3</div><div class="level-name">甲方金句翻译官</div><div class="level-act">抽金句卡，改写为可验证需求并朗读</div><div class="level-time">25 分钟</div></div>
+        <div class="level-row"><div class="level-no">4</div><div class="level-name">需求改写接龙赛</div><div class="level-act">后一组改写前一组的需求，并写出自己的原话</div><div class="level-time">15 分钟</div></div>
+        <div class="level-row"><div class="level-no">5</div><div class="level-name">投票与总结</div><div class="level-act">最佳边界图 + 翻译 1v1 PK + 复盘</div><div class="level-time">15 分钟</div></div>
+      </div>
+      <div class="summary-bar">
+        <p>本课产出：一张系统边界图 + 3 条可验证需求改写</p>
+      </div>
+      <div class="alert warning" style="margin-top:12px;">
+        <p><strong>通用规则</strong>：个人 + 小组双榜积分，每个环节设关卡分，下课结算，与平时成绩“课堂参与与互动闯关 5%”挂钩；高效使用学习通：扫码入课，抢答、投票、互评打分都在手机上完成，个人分自动累计，双榜实时更新。</p>
+      </div>
+    </div>
+  </section>
+<section class="slide">
+    <div class="slide-caption">第3页·工程师修炼地图</div>
+    <div class="slide-stage">
+      <div class="obj-badge">环节1-4分钟</div>
+      <h1 class="slide-title">工程师修炼地图：五大支柱</h1>
+      <div class="title-divider"></div>
+      <div class="pillar-grid">
+        <div class="pillar-item now"><div class="p-name">系统思维</div><div class="p-en">先看清边界</div></div>
+        <div class="pillar-item now"><div class="p-name">需求转化</div><div class="p-en">把话说成能验收的</div></div>
+        <div class="pillar-item locked"><div class="p-name">迭代开发</div><div class="p-en">小步快跑</div></div>
+        <div class="pillar-item locked"><div class="p-name">验证与质量</div><div class="p-en">用证据说话</div></div>
+        <div class="pillar-item locked"><div class="p-name">伦理与协作</div><div class="p-en">守底线、一起干</div></div>
+      </div>
+      <div class="alert info">
+        <p><strong>五大支柱是一条工程链</strong>：上一环的产出是下一环的输入——看清系统才能写清需求，写清需求才能小步迭代，迭代结果要靠验证说话，全程守伦理、讲协作。</p>
+      </div>
+      <div class="alert info">
+        <p><strong>本课闯两个关卡</strong>：系统思维（先看清边界）与需求转化（把话说成能验收的）。其余三根支柱在后续课次修炼。</p>
+      </div>
+      <div class="alert warning">
+        <p><strong>本课心法</strong>：先看系统，再定验收，最后才动手。</p>
+      </div>
+    </div>
+  </section>
+<section class="slide">
+    <div class="slide-caption">第4页·悬念开场</div>
+    <div class="slide-stage">
+      <div class="obj-badge">环节1-6分钟</div>
+      <h1 class="slide-title">食堂窗口为什么总是排长队？</h1>
+      <div class="title-divider"></div>
+      <div class="two-col">
+        <div class="col">
+          <h3 class="col-title">先猜一猜（1 分钟）</h3>
+          <div class="col-content">
+            <ul>
+              <li>窗口太少？出餐太慢？</li>
+              <li>打饭师傅动作不熟练？</li>
+              <li>还是排队本身影响了出餐？</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col">
+          <h3 class="col-title">侦探的方法</h3>
+          <div class="col-content">
+            <ul>
+              <li>不凭第一印象下结论</li>
+              <li>把"排长队"当成一个系统来画</li>
+              <li>画出边界，再找问题在哪一环</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="alert info">
+        <p><strong>学习通抢答</strong>：先投票你认为"排长队最可能的原因"，再揭晓探案提示——答对方向计个人分 1 分。</p>
+      </div>
+      <div class="reveal-wrap" id="reveal-case">
+        <button class="reveal-btn" onclick="document.getElementById('reveal-case').classList.add('open')">点击查看探案提示</button>
+        <div class="reveal-content">
+          <div class="alert success">
+            <p><strong>探案提示</strong>：排长队可能不是"出餐慢"一个问题——从输入（就餐人流、支付请求）、处理（点餐—备餐—结算）、输出（餐品与等待时间）、反馈（加档口/错峰下课/预制提速）、环境（场地/预算/人力/法规/保鲜时限）一起看，答案往往在边界之外。</p>
+          </div>
+        </div>
+      </div>
+      <a class="jump-link" href="https://ssharonxy.github.io/CareerPlanningandEngineeringLiteracy/canteen_simulator.html" target="_blank"><span class="arrow">→</span>打开食堂排队模拟器，亲手调一调窗口数</a>
+    </div>
+  </section>
+<section class="slide">
+    <div class="slide-caption">第5页·系统思维五要素与专业场景</div>
+    <div class="slide-stage">
+      <div class="obj-badge">环节2-6分钟</div>
+      <h1 class="slide-title">系统思维五要素</h1>
+      <div class="title-divider"></div>
+      <div class="card-row">
+        <div class="card blue"><h3>输入</h3><p class="text-center">进入系统的资源与需求</p></div>
+        <div class="card purple"><h3>处理</h3><p class="text-center">系统内部的核心活动</p></div>
+        <div class="card amber"><h3>输出</h3><p class="text-center">交付给环境的结果</p></div>
+      </div>
+      <div class="card-row">
+        <div class="card danger"><h3>约束</h3><p class="text-center">预算、时间、法规等限制</p></div>
+        <div class="card success"><h3>利益相关方</h3><p class="text-center">需求来源与受影响方</p></div>
+      </div>
+      <div class="alert info">
+        <p><strong>边界</strong>：划分"系统内"与"环境"的界线——边界内是我们要改造的部分，边界外是环境。先看边界，再看细节。</p>
+      </div>
+      <div class="section-title" style="margin-top:16px;">专业场景 · 五要素翻翻卡</div>
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('ps-dx')">电子信息工程 · 宿舍智能门锁</button>
+        <button class="tab-btn" onclick="switchTab('ps-zz')">数据/智能科学 · 成绩查询APP</button>
+        <button class="tab-btn" onclick="switchTab('ps-st')">广播/软件工程 · 外卖柜取件提醒</button>
+      </div>
+      <div class="tab-panel active" id="ps-dx">
+        <div class="flip-grid">
+          <div class="flip-card" onclick="this.classList.toggle('open')">
+          <div class="flip-inner">
+            <div class="flip-face flip-front"><div style="font-weight:700;color:#1f3a5f;">输入</div><p>谁把什么送进了系统？</p></div>
+            <div class="flip-face flip-back"><div style="font-weight:700;color:#1f3a5f;">输入 · 全解</div><p>刷卡/指纹、开锁指令</p></div>
+          </div>
+        </div>
+          <div class="flip-card" onclick="this.classList.toggle('open')">
+          <div class="flip-inner">
+            <div class="flip-face flip-front"><div style="font-weight:700;color:#1f3a5f;">处理</div><p>系统内部发生了什么？</p></div>
+            <div class="flip-face flip-back"><div style="font-weight:700;color:#1f3a5f;">处理 · 全解</div><p>验证身份、判断权限、执行开锁/告警</p></div>
+          </div>
+        </div>
+          <div class="flip-card" onclick="this.classList.toggle('open')">
+          <div class="flip-inner">
+            <div class="flip-face flip-front"><div style="font-weight:700;color:#1f3a5f;">输出</div><p>系统交付了什么结果？</p></div>
+            <div class="flip-face flip-back"><div style="font-weight:700;color:#1f3a5f;">输出 · 全解</div><p>开锁动作、告警记录、使用日志</p></div>
+          </div>
+        </div>
+          <div class="flip-card" onclick="this.classList.toggle('open')">
+          <div class="flip-inner">
+            <div class="flip-face flip-front"><div style="font-weight:700;color:#1f3a5f;">约束</div><p>什么限制了它？</p></div>
+            <div class="flip-face flip-back"><div style="font-weight:700;color:#1f3a5f;">约束 · 全解</div><p>供电续航、联网稳定性、安全合规</p></div>
+          </div>
+        </div>
+          <div class="flip-card" onclick="this.classList.toggle('open')">
+          <div class="flip-inner">
+            <div class="flip-face flip-front"><div style="font-weight:700;color:#1f3a5f;">利益相关方</div><p>谁受益、谁受影响？</p></div>
+            <div class="flip-face flip-back"><div style="font-weight:700;color:#1f3a5f;">利益相关方 · 全解</div><p>学生、宿管、厂商</p></div>
+          </div>
+        </div>
+        </div>
+      </div>
+      <div class="tab-panel " id="ps-zz">
+        <div class="flip-grid">
+          <div class="flip-card" onclick="this.classList.toggle('open')">
+          <div class="flip-inner">
+            <div class="flip-face flip-front"><div style="font-weight:700;color:#1f3a5f;">输入</div><p>谁把什么送进了系统？</p></div>
+            <div class="flip-face flip-back"><div style="font-weight:700;color:#1f3a5f;">输入 · 全解</div><p>学号/密码、查询指令</p></div>
+          </div>
+        </div>
+          <div class="flip-card" onclick="this.classList.toggle('open')">
+          <div class="flip-inner">
+            <div class="flip-face flip-front"><div style="font-weight:700;color:#1f3a5f;">处理</div><p>系统内部发生了什么？</p></div>
+            <div class="flip-face flip-back"><div style="font-weight:700;color:#1f3a5f;">处理 · 全解</div><p>身份校验、成绩检索与脱敏</p></div>
+          </div>
+        </div>
+          <div class="flip-card" onclick="this.classList.toggle('open')">
+          <div class="flip-inner">
+            <div class="flip-face flip-front"><div style="font-weight:700;color:#1f3a5f;">输出</div><p>系统交付了什么结果？</p></div>
+            <div class="flip-face flip-back"><div style="font-weight:700;color:#1f3a5f;">输出 · 全解</div><p>成绩单、错误提示</p></div>
+          </div>
+        </div>
+          <div class="flip-card" onclick="this.classList.toggle('open')">
+          <div class="flip-inner">
+            <div class="flip-face flip-front"><div style="font-weight:700;color:#1f3a5f;">约束</div><p>什么限制了它？</p></div>
+            <div class="flip-face flip-back"><div style="font-weight:700;color:#1f3a5f;">约束 · 全解</div><p>隐私合规、服务器负载、数据源更新周期</p></div>
+          </div>
+        </div>
+          <div class="flip-card" onclick="this.classList.toggle('open')">
+          <div class="flip-inner">
+            <div class="flip-face flip-front"><div style="font-weight:700;color:#1f3a5f;">利益相关方</div><p>谁受益、谁受影响？</p></div>
+            <div class="flip-face flip-back"><div style="font-weight:700;color:#1f3a5f;">利益相关方 · 全解</div><p>学生、教务处、任课教师、运维</p></div>
+          </div>
+        </div>
+        </div>
+      </div>
+      <div class="tab-panel " id="ps-st">
+        <div class="flip-grid">
+          <div class="flip-card" onclick="this.classList.toggle('open')">
+          <div class="flip-inner">
+            <div class="flip-face flip-front"><div style="font-weight:700;color:#1f3a5f;">输入</div><p>谁把什么送进了系统？</p></div>
+            <div class="flip-face flip-back"><div style="font-weight:700;color:#1f3a5f;">输入 · 全解</div><p>订单号/取件码、到柜信号</p></div>
+          </div>
+        </div>
+          <div class="flip-card" onclick="this.classList.toggle('open')">
+          <div class="flip-inner">
+            <div class="flip-face flip-front"><div style="font-weight:700;color:#1f3a5f;">处理</div><p>系统内部发生了什么？</p></div>
+            <div class="flip-face flip-back"><div style="font-weight:700;color:#1f3a5f;">处理 · 全解</div><p>匹配订单、触发提醒、超时重发</p></div>
+          </div>
+        </div>
+          <div class="flip-card" onclick="this.classList.toggle('open')">
+          <div class="flip-inner">
+            <div class="flip-face flip-front"><div style="font-weight:700;color:#1f3a5f;">输出</div><p>系统交付了什么结果？</p></div>
+            <div class="flip-face flip-back"><div style="font-weight:700;color:#1f3a5f;">输出 · 全解</div><p>取件通知、超时提醒</p></div>
+          </div>
+        </div>
+          <div class="flip-card" onclick="this.classList.toggle('open')">
+          <div class="flip-inner">
+            <div class="flip-face flip-front"><div style="font-weight:700;color:#1f3a5f;">约束</div><p>什么限制了它？</p></div>
+            <div class="flip-face flip-back"><div style="font-weight:700;color:#1f3a5f;">约束 · 全解</div><p>柜体容量、网络覆盖、隐私保护</p></div>
+          </div>
+        </div>
+          <div class="flip-card" onclick="this.classList.toggle('open')">
+          <div class="flip-inner">
+            <div class="flip-face flip-front"><div style="font-weight:700;color:#1f3a5f;">利益相关方</div><p>谁受益、谁受影响？</p></div>
+            <div class="flip-face flip-back"><div style="font-weight:700;color:#1f3a5f;">利益相关方 · 全解</div><p>学生、外卖平台、商家、柜体厂商</p></div>
+          </div>
+        </div>
+        </div>
+      </div>
+    </div>
+  </section>
+<section class="slide">
+    <div class="slide-caption">第6页·系统边界图画法</div>
+    <div class="slide-stage">
+      <div class="obj-badge">环节2-5分钟</div>
+      <h1 class="slide-title">系统边界图怎么画</h1>
+      <div class="title-divider"></div>
+      <svg viewBox="0 0 840 300" width="840" height="300" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrowPurple" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M 0 0 L 6 3 L 0 6 Z" fill="#8b5cf6"/>
+          </marker>
+        </defs>
+        <text x="10" y="76" font-size="11" fill="#92400e" font-weight="700">输入</text>
+        <rect x="10" y="82" width="70" height="24" rx="5" fill="#fef3c7" stroke="#f59e0b"/>
+        <text x="45" y="98" font-size="11" fill="#92400e" text-anchor="middle">就餐人流</text>
+        <rect x="10" y="114" width="70" height="24" rx="5" fill="#fef3c7" stroke="#f59e0b"/>
+        <text x="45" y="130" font-size="11" fill="#92400e" text-anchor="middle">支付请求</text>
+        <path d="M 82 94 H 122" stroke="#f59e0b" stroke-width="2"/>
+        <path d="M 82 126 H 122" stroke="#f59e0b" stroke-width="2"/>
+        <rect x="124" y="52" width="420" height="150" rx="10" fill="#f0f7ff" stroke="#4a90c2" stroke-width="2" stroke-dasharray="6 4"/>
+        <text x="140" y="76" font-size="12" fill="#1f3a5f" font-weight="700">食堂供餐系统（处理环节）</text>
+        <rect x="145" y="100" width="100" height="44" rx="6" fill="#dbeafe" stroke="#5b9bd5"/>
+        <text x="195" y="127" font-size="13" fill="#1f3a5f" text-anchor="middle">点餐</text>
+        <rect x="280" y="100" width="100" height="44" rx="6" fill="#e3eefc" stroke="#5b9bd5"/>
+        <text x="330" y="127" font-size="13" fill="#1f3a5f" text-anchor="middle">备餐</text>
+        <rect x="415" y="100" width="100" height="44" rx="6" fill="#cbdff2" stroke="#4a90c2"/>
+        <text x="465" y="127" font-size="13" fill="#1f3a5f" text-anchor="middle">结算</text>
+        <text x="145" y="176" font-size="11" fill="#64748b">可测指标：队列长度 / 平均·最长等待</text>
+        <text x="600" y="76" font-size="11" fill="#0f766e" font-weight="700">输出</text>
+        <rect x="590" y="82" width="70" height="24" rx="5" fill="#dcfce7" stroke="#16a34a"/>
+        <text x="625" y="98" font-size="11" fill="#166534" text-anchor="middle">餐品</text>
+        <rect x="590" y="114" width="70" height="24" rx="5" fill="#dcfce7" stroke="#16a34a"/>
+        <text x="625" y="130" font-size="11" fill="#166534" text-anchor="middle">等待时间</text>
+        <path d="M 546 94 H 584" stroke="#16a34a" stroke-width="2"/>
+        <path d="M 546 126 H 584" stroke="#16a34a" stroke-width="2"/>
+        <rect x="124" y="216" width="280" height="60" rx="6" fill="#fef3c7" stroke="#f59e0b"/>
+        <text x="264" y="240" font-size="12" fill="#92400e" text-anchor="middle" font-weight="700">约束区：限制条件</text>
+        <text x="264" y="260" font-size="11" fill="#92400e" text-anchor="middle">场地 · 预算 · 人力 · 法规</text>
+        <rect x="420" y="216" width="280" height="60" rx="6" fill="#f5f3ff" stroke="#8b5cf6"/>
+        <text x="560" y="240" font-size="12" fill="#5b21b6" text-anchor="middle" font-weight="700">利益相关方区</text>
+        <text x="560" y="260" font-size="11" fill="#5b21b6" text-anchor="middle">学生 · 档口员工 · 学校后勤</text>
+        
+        <path d="M 660 120 H 700 V 24 H 45 V 80" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#arrowPurple)"/>
+        <path d="M 450 24 V 52" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#arrowPurple)"/>
+        <text x="310" y="18" font-size="11" fill="#8b5cf6">反馈：等待过长 → 加档口 / 错峰下课 / 预制提速，回到输入与处理</text>
+      </svg>
+      <div class="sys-bottom">
+        <div class="sys-col">
+          <div class="alert warning">
+            <p><strong>环境与约束（边界之外）</strong></p>
+            <p>· 场地座位数：约 180 座（食堂大厅物理边界）</p>
+            <p>· 午高峰时长：实测约 35 分钟（11:40–12:15）</p>
+            <p>· 食材保鲜时限：≤ 4 小时，不能提前无限备餐</p>
+            <p>· 人力与预算上限：档口 ≤ 8 个</p>
+            <p>· 食品安全法规：留样、温度记录、从业人员健康证</p>
+          </div>
+        </div>
+        <div class="sys-col">
+          <div class="alert danger">
+            <p><strong>误区一：反馈</strong>：反馈来自环境，不是处理环节。</p>
+          </div>
+          <div class="alert warning">
+            <p><strong>误区二：约束 ≠ 相关方</strong>。约束是限制，相关方是受影响方。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+<section class="slide">
+    <div class="slide-caption">第7页·系统侦探挑战</div>
+    <div class="slide-stage">
+      <div class="obj-badge">环节2-14分钟</div>
+      <h1 class="slide-title">系统侦探挑战</h1>
+      <div class="title-divider"></div>
+      <div class="card-row">
+        <div class="card blue"><h3>任务卡（四选一）</h3><p class="text-center">食堂排队（不可选，替换为其他生活案例，如外卖配送等）<br/>图书馆占座<br/>快递点取件<br/>晚自习教室</p></div>
+        <div class="card amber"><h3>要求</h3><p>10 分钟内画出该系统的边界图</p><p>标注输入—处理—输出—约束—利益相关方</p></div>
+        <div class="card success"><h3>流程</h3><p>第 10 分钟学习通上传本组边界图截图</p><p>贴展板巡展，学习通互评打分（五要素齐全度）</p></div>
+      </div>
+      <div class="alert info">
+        <p><strong>判断标准</strong>：边界是否闭合；五要素是否齐全；约束是否 ≥ 3 条；约束与利益相关方有没有混淆。</p>
+      </div>
+      <a class="jump-link" href="https://ssharonxy.github.io/CareerPlanningandEngineeringLiteracy/boundary_challenge.html" target="_blank"><span class="arrow">→</span>打开边界归位挑战，把卡片放进框内、框外、约束还是利益相关方</a>
+    </div>
+  </section>
+<section class="slide">
+    <div class="slide-caption">第8页·甲方金句翻译官</div>
+    <div class="slide-stage">
+      <div class="obj-badge">环节3-12分钟</div>
+      <h1 class="slide-title">甲方金句翻译官</h1>
+      <div class="title-divider"></div>
+      <div class="flip-grid">
+        <div class="flip-card" onclick="this.classList.toggle('open')">
+          <div class="flip-inner">
+            <div class="flip-face flip-front">这个页面要好看一点</div>
+            <div class="flip-face flip-back">首屏 3 秒内完整渲染；移动端字号 ≥ 14px；导航始终可见</div>
+          </div>
+        </div>
+        <div class="flip-card" onclick="this.classList.toggle('open')">
+          <div class="flip-inner">
+            <div class="flip-face flip-front">系统要稳定</div>
+            <div class="flip-face flip-back">高峰期 200 并发时错误率 &lt; 0.5%</div>
+          </div>
+        </div>
+        <div class="flip-card" onclick="this.classList.toggle('open')">
+          <div class="flip-inner">
+            <div class="flip-face flip-front">越快越好</div>
+            <div class="flip-face flip-back">查询响应 P95 ≤ 800ms</div>
+          </div>
+        </div>
+        <div class="flip-card" onclick="this.classList.toggle('open')">
+          <div class="flip-inner">
+            <div class="flip-face flip-front">功能要丰富一点</div>
+            <div class="flip-face flip-back">覆盖 5 类核心场景，每类 ≥ 1 个主流程</div>
+          </div>
+        </div>
+      </div>
+      <div class="alert warning">
+        <p><strong>玩法</strong>：小组抽金句卡 → 限时改写为可测量、可复现、有阈值的要求 → 上台朗读 → 其他组当"验收方"举红蓝双色牌判断是否达标 → 学习通投票"最达标的改写"。</p>
+      </div>
+      <div class="alert success">
+        <p><strong>点击卡片看翻译示例</strong>（课堂上先自己翻，再对照）。</p>
+      </div>
+    </div>
+  </section>
+<section class="slide">
+    <div class="slide-caption">第9页·改写三要点与对照表</div>
+    <div class="slide-stage">
+      <div class="obj-badge">环节3-13分钟</div>
+      <h1 class="slide-title">模糊需求改写的三条要求</h1>
+      <div class="title-divider"></div>
+      <div class="card-row">
+        <div class="card blue"><h3>可测量</h3><p class="text-center">有数字、有对象</p></div>
+        <div class="card purple"><h3>可复现</h3><p class="text-center">说清场景与条件</p></div>
+        <div class="card success"><h3>有阈值</h3><p class="text-center">明确达标线</p></div>
+      </div>
+      <div class="alert info">
+        <p><strong>一句话口诀</strong>：能测、能重演、有底线——三者齐了，需求才算"可验收"。</p>
+      </div>
+      <div class="section-title" style="margin-top:12px;">金句改写对照表（食堂排队为例）</div>
+      <table class="data-table">
+        <colgroup><col style="width:22%"><col style="width:78%"></colgroup>
+        <thead>
+          <tr><th>甲方原话</th><th>改写版（可测量·可复现·有阈值）</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="dim-col">食堂排队要短一点</td><td>当日平均等待时间 ≤ 阈值（3.0 分钟）。 连续 5 个工作日中≥ 4 天达标即通过验收。</td></tr>
+        </tbody>
+      </table>
+      <div class="alert info">
+        <p><strong>要素拆解</strong>（以改写版为例，找出每类要素）：</p>
+        <p>· 平均等待时间 —— <b>对象</b>　　· 3.0 分钟 —— <b>数字</b></p>
+        <p>· 午高峰（11:40—12:15）—— <b>场景与条件</b>　　· 连续 5 个工作日 —— <b>场景与条件</b></p>
+        <p>· ≥ 4 天达标 —— <b>达标线</b></p>
+      </div>
+      <div class="summary-bar">
+        <p>改写的本质：把"感觉"翻译成"证据"</p>
+      </div>
+    </div>
+  </section>
+<section class="slide">
+    <div class="slide-caption">第10页·需求改写接龙赛</div>
+    <div class="slide-stage">
+      <div class="obj-badge">环节4-15分钟</div>
+      <h1 class="slide-title">需求改写接龙赛</h1>
+      <div class="title-divider"></div>
+            <div class="step-list">
+        <div class="step-item"><div class="step-num">A</div><div class="step-title">A 组写原话</div><div class="step-desc">在本组系统边界图基础上，写 1 条真实需求（怎么模糊怎么来）</div></div>
+        <div class="step-item"><div class="step-num">B</div><div class="step-title">B 组接龙改写</div><div class="step-desc">改写 A 组的需求（可测量、可复现、有阈值），并在本组系统边界图基础上，写 1 条真实需求（怎么模糊怎么来）</div></div>
+        <div class="step-item"><div class="step-num">C</div><div class="step-title">C 组接龙改写</div><div class="step-desc">改写 B 组的需求（可测量、可复现、有阈值），并在本组系统边界图基础上，写 1 条真实需求（怎么模糊怎么来）</div></div>
+        <div class="step-item"><div class="step-num">A</div><div class="step-title">A 组接龙改写</div><div class="step-desc">改写 C 组的需求（可测量、可复现、有阈值）</div></div>
+      </div>
+      <div class="alert warning">
+        <p><strong>接龙规则</strong>：后一组改写前一组的需求（可测量、可复现、有阈值），并写 1 条自己的真实需求；A→B→C→A 循环接龙，依次传下去。</p>
+      </div>
+      <div class="alert success">
+        <p><strong>评选</strong>：学习通投票选出"前后组PK谁赢了"，获胜组 +1 分；学习通投票从PK获胜组中选出"最硬核需求改写"，上榜小组获小组积分。</p>
+      </div>
+    </div>
+  </section>
+<section class="slide">
+    <div class="slide-caption">第11页·投票与总结</div>
+    <div class="slide-stage">
+      <div class="obj-badge">环节5-15分钟</div>
+      <h1 class="slide-title">最佳边界图投票与复盘</h1>
+      <div class="title-divider"></div>
+      <div class="card-row">
+        <div class="card blue"><h3>最佳边界图</h3><p class="text-center">学习通投票：边界最清晰、五要素最齐全</p></div>
+        <div class="card amber"><h3>翻译 1v1 PK</h3><p class="text-center">学习通投票：前后组谁赢了，获胜组 +1 分</p></div>
+        <div class="card purple"><h3>最佳翻译官</h3><p class="text-center">在 PK 获胜的回答中评选；同一组最多可再加 1 分</p></div>
+      </div>
+      <div class="alert info">
+        <p><strong>加 2 分机会</strong>：PK 获胜 +1 分，最佳翻译官 +1 分——同一组最多可加 2 分。</p>
+      </div>
+      <div class="alert info">
+        <p><strong>学习通随堂小测</strong>：五要素快问快答，答对计个人分，计入本课关卡分结算。</p>
+      </div>
+      <div class="alert warning">
+        <p><strong>思考题</strong>：你身边的哪个“不合理”现象其实是因为系统边界没画清楚？如果把边界画出来，你会增加或去掉哪些要素？</p>
+      </div>
+      <div class="summary-bar">
+        <p>保留本课边界图，它是第5课的输入</p>
+      </div>
+      <div class="alert warning">
+        <p><strong>本课心法复盘</strong>：先看边界、再定验收、动手才快。预告第5课"需求工程与验收标准"。</p>
+      </div>
+    </div>
+  </section></div>
+<script>
+  function switchTab(id) {
+    var cards = document.querySelectorAll('.flip-card');
+    for (var c = 0; c < cards.length; c++) { cards[c].classList.remove('open'); }
+    var tabs = document.querySelectorAll('.tab-panel');
+    for (var i = 0; i < tabs.length; i++) { tabs[i].classList.remove('active'); }
+    var all = document.querySelectorAll('.tab-btn');
+    for (var k = 0; k < all.length; k++) {
+      all[k].classList.remove('active');
+      var pid = all[k].getAttribute('onclick').match(/'([^']+)'/)[1];
+      if (pid === id) { all[k].classList.add('active'); }
+    }
+    document.getElementById(id).classList.add('active');
+  }
+</script>
+</body>
+</html>
