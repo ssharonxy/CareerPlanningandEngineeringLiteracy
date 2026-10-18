@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="zh">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>职业规划与工程素养·第6课（对外公开版）</title>
+  <style>
+    :root {
+      --color-primary: #4a90c2;
+      --color-primary-deep: #2f5597;
+      --color-primary-dark: #1f3a5f;
+      --color-primary-mid: #5b9bd5;
+      --color-primary-bright: #1d4ed8;
+      --color-primary-card: #1e40af;
+      --bg-blue-50: #f0f7ff;
+      --bg-blue-100: #e3eefc;
+      --bg-blue-200: #eaf1fb;
+      --bg-blue-300: #dbeafe;
+      --bg-blue-400: #eff6ff;
+      --bg-blue-500: #cbdff2;
+      --bg-blue-600: #9ec7e8;
+      --bg-page: #f0f0f3;
+      --bg-slide: #ffffff;
+      --bg-gray-50: #f8fafc;
+      --bg-gray-100: #f8f9fb;
+      --text-primary: #333333;
+      --text-secondary: #444444;
+      --text-muted: #64748b;
+      --text-gray: #94a3b8;
+      --border-light: #e5e7eb;
+      --border-default: #cccccc;
+      --border-table: #dddddd;
+      --color-success-text: #166534;
+      --color-success-deep: #14532d;
+      --bg-success-100: #dcfce7;
+      --bg-success-50: #f0fdf4;
+      --color-danger-text: #991b1b;
+      --color-danger-deep: #7f1d1d;
+      --bg-danger-100: #fee2e2;
+      --bg-danger-50: #fef2f2;
+      --color-warning-text: #92400e;
+      --bg-warning-100: #fef3c7;
+      --bg-warning-50: #fff7ed;
+      --color-purple-text: #5b21b6;
+      --bg-purple-50: #f5f3ff;
+      --color-purple: #8b5cf6;
+      --font-sans: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+      --font-mono: "Consolas", "ui-monospace", "Menlo", monospace;
+    }
+
+    body { font-family: var(--font-sans); background: var(--bg-page); margin: 0; padding: 24px; color: var(--text-primary); }
+    .deck { max-width: 960px; margin: 0 auto; }
+    .slide { margin-bottom: 28px; }
+    .slide-caption { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+    .slide-stage { position: relative; overflow: hidden; border-radius: 6px; box-shadow: 0 2px 10px rgba(0, 0, 0, .12); margin: 0 auto; background: var(--bg-slide); width: 960px; min-height: 540px; padding: 50px 60px 60px; box-sizing: border-box; }
+    .obj-badge { position: absolute; top: 12px; right: 20px; background: var(--color-purple); color: #fff; padding: 4px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; z-index: 10; }
+    .slide-title { font-size: 30px; font-weight: 700; color: var(--color-primary-dark); margin: 0 0 8px; line-height: 1.4; }
+    .title-divider { width: 100%; height: 3px; background: var(--color-primary); margin-bottom: 22px; }
+    .section-title { font-size: 20px; font-weight: 700; color: var(--color-primary-dark); margin: 0 0 14px; text-align: center; }
+
+    .card-row { display: flex; gap: 14px; margin-bottom: 12px; }
+    .card { flex: 1; padding: 10px 14px; border-radius: 4px; box-sizing: border-box; }
+    .card h3 { font-size: 17px; font-weight: 700; margin: 0 0 6px; text-align: center; }
+    .card p { margin: 0 0 4px; font-size: 13px; line-height: 1.6; }
+    .card.blue { background: var(--bg-blue-400); } .card.blue h3 { color: var(--color-primary-card); } .card.blue p { color: var(--text-secondary); }
+    .card.amber { background: var(--bg-warning-100); } .card.amber h3 { color: var(--color-warning-text); } .card.amber p { color: var(--text-secondary); }
+    .card.purple { background: var(--bg-purple-50); } .card.purple h3 { color: var(--color-purple-text); } .card.purple p { color: var(--text-secondary); }
+    .card.success { background: var(--bg-success-100); } .card.success h3 { color: var(--color-success-text); } .card.success p { color: var(--text-secondary); }
+    .card.danger { background: var(--bg-danger-100); } .card.danger h3 { color: var(--color-danger-text); } .card.danger p { color: var(--text-secondary); }
+
+    .data-table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 16px; border: 1px solid var(--border-default); border-radius: 4px; overflow: hidden; }
+    .data-table th { background: var(--color-primary-deep); color: #fff; font-size: 14px; font-weight: 700; padding: 6px 6px; border: 1px solid var(--border-table); text-align: center; }
+    .data-table td { font-size: 13px; padding: 5px 6px; border: 1px solid var(--border-table); vertical-align: middle; word-break: break-word; color: var(--text-secondary); }
+    .data-table td.dim-col { background: var(--bg-blue-200); color: var(--color-primary-dark); font-weight: 700; text-align: center; }
+    .data-table td.highlight { color: var(--color-success-text); font-weight: 600; }
+    .data-table td.bad { color: var(--color-danger-text); font-weight: 600; }
+
+    .step-list { margin-bottom: 16px; }
+    .step-item { display: flex; align-items: center; gap: 14px; background: var(--bg-gray-50); border-left: 5px solid var(--color-primary-mid); padding: 8px 18px; margin-bottom: 8px; min-height: 56px; box-sizing: border-box; }
+    .step-num { width: 40px; height: 40px; background: var(--bg-blue-300); color: var(--color-primary-bright); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; flex-shrink: 0; }
+    .step-title { font-size: 17px; font-weight: 700; color: var(--text-primary); min-width: 150px; }
+    .step-desc { font-size: 13.5px; color: var(--text-secondary); flex: 1; line-height: 1.6; }
+
+    .alert { padding: 12px 18px; border-radius: 4px; margin-bottom: 14px; border-left: 6px solid; }
+    .alert p { margin: 0 0 4px; font-size: 14px; line-height: 1.6; }
+    .alert.danger { background: var(--bg-danger-50); border-color: var(--color-danger-text); } .alert.danger p { color: var(--color-danger-deep); }
+    .alert.success { background: var(--bg-success-50); border-color: var(--color-success-text); } .alert.success p { color: var(--color-success-deep); }
+    .alert.warning { background: var(--bg-warning-50); border-color: var(--color-warning-text); } .alert.warning p { color: var(--color-warning-text); }
+    .alert.info { background: var(--bg-blue-200); border-color: var(--color-primary); } .alert.info p { color: var(--color-primary-dark); }
+
+    .summary-bar { background: var(--bg-blue-200); padding: 12px 18px; border-radius: 4px; margin-top: 14px; }
+    .summary-bar p { color: var(--color-primary-dark); font-size: 17px; font-weight: 600; margin: 0; line-height: 1.5; }
+
+    .cover-slide { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; min-height: 540px; padding-top: 20px; }
+    .cover-title { font-size: 42px; font-weight: 700; color: var(--color-primary-dark); margin: 0 0 14px; line-height: 1.4; }
+    .cover-subtitle { font-size: 22px; color: var(--text-muted); margin: 0 0 34px; font-weight: 400; }
+    .cover-meta { font-size: 15px; color: var(--text-secondary); line-height: 2; }
+
+    .level-map { display: flex; flex-direction: column; gap: 8px; }
+    .level-row { display: flex; align-items: center; gap: 12px; background: var(--bg-blue-50); border-radius: 4px; padding: 8px 14px; border-left: 5px solid var(--color-primary); }
+    .level-no { width: 34px; height: 34px; background: var(--color-primary); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; flex-shrink: 0; }
+    .level-name { font-size: 16px; font-weight: 700; color: var(--color-primary-dark); min-width: 210px; }
+    .level-act { font-size: 13.5px; color: var(--text-secondary); flex: 1; line-height: 1.5; }
+    .level-time { font-size: 13px; color: var(--color-purple-text); font-weight: 700; white-space: nowrap; }
+
+    .two-col { display: flex; gap: 26px; margin-bottom: 16px; }
+    .two-col .col { flex: 1; min-width: 0; }
+    .col-title { font-size: 17px; font-weight: 700; color: var(--color-primary-dark); margin: 0 0 10px; padding-bottom: 6px; border-bottom: 2px solid var(--color-primary-mid); }
+    .col-content ul { margin: 0; padding-left: 20px; font-size: 14.5px; line-height: 2; color: var(--text-secondary); }
+
+    .code-block { background: #1e293b; color: #e2e8f0; font-family: var(--font-mono); font-size: 13px; line-height: 1.7; padding: 14px 18px; border-radius: 6px; margin-bottom: 12px; white-space: pre; overflow-x: auto; }
+    .code-block .cmt { color: #94a3b8; }
+    .code-block .ok { color: #4ade80; }
+    .code-block .bad { color: #f87171; }
+    .prompt-block { background: var(--bg-purple-50); border-left: 5px solid var(--color-purple); padding: 10px 16px; border-radius: 4px; margin-bottom: 12px; font-size: 14px; color: var(--color-purple-text); line-height: 1.7; }
+    .prompt-block b { color: var(--color-purple-text); }
+
+    .hl-yellow { background: #fef08a; padding: 0 4px; border-radius: 3px; }
+
+    .flip-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    .flip-card { min-height: 56px; perspective: 900px; cursor: pointer; }
+    .flip-inner { position: relative; width: 100%; min-height: 56px; transition: transform .45s; transform-style: preserve-3d; }
+    .flip-card.open .flip-inner { transform: rotateY(180deg); }
+    .flip-face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 6px; padding: 8px 14px; display: flex; align-items: center; font-size: 14px; line-height: 1.5; }
+    .flip-front { background: var(--bg-blue-100); color: var(--color-primary-dark); }
+    .flip-back { background: var(--bg-success-100); color: var(--color-success-deep); transform: rotateY(180deg); font-weight: 600; }
+    .big-def { font-size: 19px; font-weight: 700; color: var(--color-primary-dark); }
+    .text-muted { color: var(--text-muted); }
+    .text-center { text-align: center; }
+  </style>
+</head>
+
+<body>
+  <div class="deck">
+
+    <!-- 第1页 封面 -->
+    <section class="slide">
+      <div class="slide-caption">第1页·封面</div>
+      <div class="slide-stage cover-slide">
+        <div class="cover-title">职业规划与工程素养</div>
+        <p class="cover-subtitle">第6课　测试与质量保障：用测试用例锁定需求</p>
+        <p class="cover-meta">从"口头约定"到机器可验证的规则 · 先写用例，再写代码</p>
+      </div>
+    </section>
+
+    <!-- 第2页 本课目录 -->
+    <section class="slide">
+      <div class="slide-caption">第2页·本课目录</div>
+      <div class="slide-stage">
+        <div class="obj-badge">约 3 分钟</div>
+        <h1 class="slide-title">本课目录</h1>
+        <div class="title-divider"></div>
+        <div class="level-map">
+          <div class="level-row"><div class="level-no">1</div><div class="level-name">导入：为什么会扯皮</div><div class="level-act">承接第5课的"口头约定"，看一次验收现场</div><div class="level-time">约5分钟</div></div>
+          <div class="level-row"><div class="level-no">2</div><div class="level-name">概念与方法</div><div class="level-act">测试用例三要素、常用测试设计方法、三类场景、断言、缺陷五要素</div><div class="level-time">约28分钟</div></div>
+          <div class="level-row"><div class="level-no">3</div><div class="level-name">例题带教：hello world</div><div class="level-act">用AI写代码写测试，PyCharm+pytest现场跑绿条红条</div><div class="level-time">约18分钟</div></div>
+          <div class="level-row"><div class="level-no">4</div><div class="level-name">核心互动：用例编写工作坊</div><div class="level-act">基于本组任务单写用例集、补断言、填缺陷卡</div><div class="level-time">约27分钟</div></div>
+          <div class="level-row"><div class="level-no">5</div><div class="level-name">小结与作业</div><div class="level-act">可测量、可复现、可追溯；5题快问快答随堂检测</div><div class="level-time">约9分钟</div></div>
+        </div>
+        <div class="summary-bar">
+          <p>本课产出：本组测试用例集初稿</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 第3页 导入 -->
+    <section class="slide">
+      <div class="slide-caption">第3页·导入：从口头约定到机器可验证</div>
+      <div class="slide-stage">
+        <div class="obj-badge">约 5 分钟</div>
+        <h1 class="slide-title">验收为什么会扯皮？</h1>
+        <div class="title-divider"></div>
+        <div class="two-col">
+          <div class="col">
+            <h3 class="col-title">现场：双方各执一词</h3>
+            <div class="col-content">
+              <ul>
+                <li>开发："功能我已经做好了，能跑。"</li>
+                <li>用户："这根本没法用，太慢了。"</li>
+                <li>开发："你说的'慢'是多少？"</li>
+                <li>用户："就是……反正我不满意。"</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <h3 class="col-title">问题出在哪</h3>
+            <div class="col-content">
+              <ul>
+                <li>第5课我们把"排队快一点"改成了<span class="hl-yellow">≤3分钟</span>的可验证标准</li>
+                <li>但"做到什么算达标"还需要<strong>能被机器自动跑出来</strong></li>
+                <li>这就是今天要学的——<strong>测试用例</strong>：把 <span class="big-def" style="font-size:17px;">口头约定</span> 变成 <span class="big-def" style="font-size:17px;">可自动核对的规则</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="alert warning">
+          <p><strong>提问</strong>：如果当初把"能用"写成什么具体内容，今天就不用吵了？</p>
+        </div>
+        <div class="alert info" style="margin-top:10px;">
+          <p><strong>什么是"闭环"？</strong>做完 → 测 → 记录 → 改 → 再测，测试结果反馈回来驱动下一轮改进，形成一个不断循环的回路，而不是做完就交差。<strong>闭环思维本身就是一项重要的工程素养。</strong></p>
+        </div>
+        <div class="summary-bar">
+          <p>质量闭环：需求 → 用例 → 断言 → 运行 → 缺陷记录 → 迭代追溯</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 第4页 概念①：测试用例三要素 -->
+    <section class="slide">
+      <div class="slide-caption">第4页·概念①：测试用例三要素</div>
+      <div class="slide-stage">
+        <div class="obj-badge">约 6 分钟</div>
+        <h1 class="slide-title">测试用例＝给需求出的"考卷"</h1>
+        <div class="title-divider"></div>
+        <div class="step-list">
+          <div class="step-item">
+            <div class="step-num">Given</div>
+            <div class="step-title" style="font-size:18px;">前置条件</div>
+            <div class="step-desc" style="font-size:14.5px;">食堂已营业、8个档口全开、学生已到场排队</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">When</div>
+            <div class="step-title" style="font-size:18px;">输入/操作</div>
+            <div class="step-desc" style="font-size:14.5px;">周一至周五 12:00—12:30 午高峰，从排队开始计时</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">Then</div>
+            <div class="step-title" style="font-size:18px;">期望输出</div>
+            <div class="step-desc" style="font-size:14.5px;"><strong style="color:var(--color-success-text)">平均等待时间 ≤ 3.0 分钟</strong>，连续5天中≥4天达标</div>
+          </div>
+        </div>
+        <div class="alert info">
+          <p><strong>为什么说"测试用例是需求的另一种写法"</strong>：需求只说"要快"，用例写清"<span class="big-def" style="font-size:17px;">多快算快、怎么测、过了才算好</span>"——双方对同一条用例，就不会各说各话。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 第5页 概念②：测试设计方法全景 -->
+    <section class="slide">
+      <div class="slide-caption">第5页·概念②：测试设计方法有哪些</div>
+      <div class="slide-stage">
+        <div class="obj-badge">约 6 分钟</div>
+        <h1 class="slide-title">测试设计方法大家族，本课只学最基础的两种</h1>
+        <div class="title-divider"></div>
+        <div class="card-row">
+          <div class="card blue"><h3>等价类划分</h3><p class="text-center"><strong>本课掌握</strong></p><p>把"等待时间"划成两类：有效类（≤3分钟）、无效类（&gt;3分钟），每类取一个代表值</p></div>
+          <div class="card blue"><h3>边界值分析</h3><p class="text-center"><strong>本课掌握</strong></p><p>在3分钟这条边界附近取值：2.9 / 3.0 / 3.1 分钟，最容易出bug</p></div>
+          <div class="card purple"><h3>决策表</h3><p class="text-center">后续再学</p><p>多条件组合时用</p></div>
+          <div class="card purple"><h3>场景法</h3><p class="text-center">后续再学</p><p>业务流程串联时用</p></div>
+          <div class="card purple"><h3>错误推测法</h3><p class="text-center">后续再学</p><p>凭经验猜易错点</p></div>
+        </div>
+        <div class="alert info">
+          <p><strong>用食堂排队记牢</strong>：</p>
+          <p>· <strong>等价类划分</strong>＝挑代表：正常挑 2.5 分钟、异常挑 5 分钟，不用每个时间都测</p>
+          <p>· <strong>边界值分析</strong>＝盯临界：就测边界左 <strong>2.9</strong>、边界值 <strong>3.0</strong>、边界右 <strong>3.1</strong> 这三个卡线的值</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 第6页 概念③：三类场景 -->
+    <section class="slide">
+      <div class="slide-caption">第6页·概念③：三类场景</div>
+      <div class="slide-stage">
+        <div class="obj-badge">约 8 分钟</div>
+        <h1 class="slide-title">两类方法 → 三类用例场景</h1>
+        <div class="title-divider"></div>
+        <table class="data-table">
+          <colgroup><col style="width:13%"><col style="width:18%"><col style="width:33%"><col style="width:36%"></colgroup>
+          <thead><tr><th>场景</th><th>用什么方法</th><th>怎么设计用例</th><th>食堂排队例子</th></tr></thead>
+          <tbody>
+            <tr><td class="dim-col">正常场景</td><td>有效等价类划分</td><td>从合法输入里挑 <strong>1 个代表值</strong>，完整走通一遍流程</td><td>12:10 排队实测 <strong>2.5 分钟</strong>→通过</td></tr>
+            <tr><td class="dim-col">异常场景</td><td>无效等价类划分</td><td>从不合法输入里挑代表值，看系统怎么处理</td><td>客流激增实测 <strong>5 分钟</strong>、档口临时关闭、断网刷卡</td></tr>
+            <tr><td class="dim-col">边界场景</td><td>边界值分析</td><td>在阈值边界附近取 <strong>min / min-1 / max / max+1 / 空值</strong></td><td><strong>3.0 临界达标、3.1 刚好超出、0 没人排队</strong></td></tr>
+          </tbody>
+        </table>
+        <div class="alert warning">
+          <p><strong>一句话记住映射</strong>：<span class="hl-yellow">正常＋异常＝等价类划分</span>（各挑一个代表值），<span class="hl-yellow">边界＝边界值分析</span>（在阈值旁额外补几刀）。</p>
+          <p><strong>为什么"0 没人排队"算边界而不是异常？</strong>因为它是输入的<strong>有效下限</strong>——排队人数可以合法地取到 0，只是正好压在边界上；而"断网刷卡""档口关闭"属于流程被破坏，才是异常。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 第7页 概念④：断言与缺陷记录 -->
+    <section class="slide">
+      <div class="slide-caption">第7页·概念④：断言与缺陷记录</div>
+      <div class="slide-stage">
+        <div class="obj-badge">约 8 分钟</div>
+        <h1 class="slide-title">断言三件套 + 缺陷记录五要素</h1>
+        <div class="title-divider"></div>
+        <div class="two-col">
+          <div class="col">
+            <h3 class="col-title">assert 断言三件套</h3>
+            <div class="col-content">
+              <ul>
+                <li><strong>主体</strong>：谁的什么指标</li>
+                <li><strong>阈值</strong>：多少算达标</li>
+                <li><strong>可复现路径</strong>：用什么输入能重现</li>
+              </ul>
+              <div class="code-block" style="margin-top:8px;"><span class="cmt"># 食堂排队：把"要快"写成可验证的断言</span>
+<span class="cmt"># 主体=平均等待时间 阈值=≤3.0分钟 路径=午高峰实测</span>
+assert avg_wait_min <span class="ok">&lt;=</span> 3.0, \
+       f"期望≤3.0分钟，实际{avg_wait_min}分钟"</div>
+            </div>
+          </div>
+          <div class="col">
+            <h3 class="col-title">缺陷记录五要素（写什么）</h3>
+            <div class="col-content">
+              <ul style="list-style:none;padding-left:0;">
+                <li style="margin-bottom:8px;"><strong>复现步骤</strong>：一步步怎么操作能重现
+                  <div style="padding-left:18px;color:var(--text-muted);font-size:13px;">例：周一12:15到三号档口排队</div></li>
+                <li style="margin-bottom:8px;"><strong>期望结果</strong>：按需求本应怎样
+                  <div style="padding-left:18px;color:var(--text-muted);font-size:13px;">例：≤3.0分钟取餐</div></li>
+                <li style="margin-bottom:8px;"><strong>实际结果</strong>：实际发生了什么
+                  <div style="padding-left:18px;color:var(--text-muted);font-size:13px;">例：等了5.2分钟</div></li>
+                <li style="margin-bottom:8px;"><strong>运行环境</strong>：在哪测的
+                  <div style="padding-left:18px;color:var(--text-muted);font-size:13px;">例：三楼食堂、周三午高峰、8档口全开</div></li>
+                <li><strong>严重级别</strong>：多严重
+                  <div style="padding-left:18px;color:var(--text-muted);font-size:13px;">例：中（体验差但未瘫痪）</div></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="alert success">
+          <p><span class="hl-yellow">测试失败 ≠ 写错代码</span>——失败记录是<span class="big-def" style="font-size:16px;">需求澄清</span>与<span class="big-def" style="font-size:16px;">质量改进</span>的起点，缺五要素任何一项都是不合格的失败记录。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 第8页 例题带教①：用AI生成代码和测试 -->
+    <section class="slide">
+      <div class="slide-caption">第8页·例题带教①：用AI生成hello函数和测试</div>
+      <div class="slide-stage">
+        <div class="obj-badge">约 8 分钟</div>
+        <h1 class="slide-title">例题：给 hello world 写单测</h1>
+        <div class="title-divider"></div>
+        <p style="font-size:14.5px;color:var(--text-secondary);margin:0 0 10px;">需求：每个程序员写的第一个函数 <code>hello(name)</code>——传名字返回问候语，不传参默认问候"世界"。<strong>不手写代码，全程让AI生成，重点学怎么提提示词。</strong></p>
+        <div class="prompt-block"><b>提示词①（生成代码）：</b>请用Python写一个函数hello(name)，传入名字返回问候语，不传参数时默认问候世界。</div>
+        <div class="prompt-block"><b>提示词②（生成测试）：</b>请为上面的hello函数写pytest单元测试文件test_hello.py，覆盖正常、边界、异常三类场景，全部用assert断言。</div>
+        <div class="code-block"><span class="cmt"># AI 生成的测试大概长这样（test_hello.py）</span>
+def test_normal_default():  assert hello()       == "你好，世界！"
+def test_normal_name():      assert hello("小明")  == "你好，小明！"
+def test_boundary_empty():   assert hello("")      == "你好，！"
+def test_boundary_long():    assert len(hello("a"*50)) &gt; 0
+def test_error_type():       with pytest.raises(TypeError): hello(123)</div>
+      </div>
+    </section>
+
+    <!-- 第9页 例题带教②：pytest跑绿条红条 -->
+    <section class="slide">
+      <div class="slide-caption">第9页·例题带教②：PyCharm现场跑</div>
+      <div class="slide-stage">
+        <div class="obj-badge">约 10 分钟</div>
+        <h1 class="slide-title">先看绿条，再看红条，关键是判断谁错了</h1>
+        <div class="title-divider"></div>
+        <div class="step-list">
+          <div class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-title">绿条全过</div>
+            <div class="step-desc">PyCharm 右键 pytest 运行，5 条测试全绿——AI 生成的代码和测试对得上</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-title">故意改错期望</div>
+            <div class="step-desc">把空名字那条期望改成 <code>"你好！"</code>（函数实际返回 <code>"你好，！"</code>），跑出红条</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-title">关键判断</div>
+            <div class="step-desc">这条失败是<strong>代码错了还是测试期望写错了</strong>？函数符合需求设计——是测试期望写错，不是代码缺陷</div>
+          </div>
+        </div>
+        <div class="alert danger">
+          <p><strong>记住</strong>：看到红条不要立刻改代码！先核对——是代码没按需求实现，还是测试期望本身写错了？这正是"测试失败≠写错代码"。AI 生成的测试会写对也会写错，要逐条用三要素和三类场景核对，<strong>不能照搬照抄</strong>。</p>
+        </div>
+        <div class="alert info">
+          <p><strong>回到食堂排队</strong>：正常（实测2.5分钟→过）｜边界（正好3.0分钟→过）｜异常（客流激增实测5分钟→记缺陷）。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 第10页 核心互动：工作坊 -->
+    <section class="slide">
+      <div class="slide-caption">第10页·随堂作业：用例编写工作坊</div>
+      <div class="slide-stage">
+        <div class="obj-badge">约 27 分钟</div>
+        <h1 class="slide-title">随堂作业：测试用例编写工作坊</h1>
+        <div class="title-divider"></div>
+        <div class="step-list">
+          <div class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-title">选一条验收标准</div>
+            <div class="step-desc">基于本组第5次课《需求转化任务单》，选1条核心标准</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-title">写用例集</div>
+            <div class="step-desc">正常≥2条、边界≥2条、异常≥2条，每条写全三要素（前置条件、输入/操作、期望输出）</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-title">补1条断言</div>
+            <div class="step-desc">对其中1条口头约定补写assert：主体＋阈值＋可复现路径</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">4</div>
+            <div class="step-title">填1张缺陷卡</div>
+            <div class="step-desc">把1条失败（或预判失败）用例填进缺陷记录卡（五要素）</div>
+          </div>
+        </div>
+        <div class="alert success">
+          <p><strong>写完后逐条自查</strong>：①期望输出写了具体值而非"成功""正常"；②边界取到min/min-1/max/max+1/空值；③异常覆盖空值与非法输入；④断言补全三件套；⑤缺陷卡五要素齐全。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 第11页 小结与随堂检测 -->
+    <section class="slide">
+      <div class="slide-caption">第11页·小结与随堂检测</div>
+      <div class="slide-stage">
+        <div class="obj-badge">约 9 分钟</div>
+        <h1 class="slide-title">小结 + 随堂检测：5题快问快答</h1>
+        <div class="title-divider"></div>
+        <div class="summary-bar">
+          <p>可测量、可复现、可追溯；测试失败 ≠ 写错代码</p>
+        </div>
+        <div class="flip-grid" style="margin-top:14px;">
+          <div class="flip-card"><div class="flip-inner">
+            <div class="flip-face flip-front">1. "用户名6—12位"按<strong>边界值分析</strong>要取哪几个值？</div>
+            <div class="flip-face flip-back">答案：6、5、12、13，外加空值（min、min-1、max、max+1、空值）</div>
+          </div></div>
+          <div class="flip-card"><div class="flip-inner">
+            <div class="flip-face flip-front">2. 哪个属于<strong>无效等价类</strong>？A 正常用户名　B 空用户名　C 正好6位　D 正好12位</div>
+            <div class="flip-face flip-back">答案：B（空用户名）——有效等价类是合法输入，无效等价类是不合法输入</div>
+          </div></div>
+          <div class="flip-card"><div class="flip-inner">
+            <div class="flip-face flip-front">3. "密码至少8位含数字"，正常场景和边界分别用什么方法？</div>
+            <div class="flip-face flip-back">答案：正常=等价类划分取合法代表值（8位含数字）；边界=边界值分析取7/8/9位</div>
+          </div></div>
+          <div class="flip-card"><div class="flip-inner">
+            <div class="flip-face flip-front">4. 失败记录只写"登录失败"，缺了<strong>缺陷五要素</strong>哪几项？</div>
+            <div class="flip-face flip-back">答案：复现步骤、期望结果、实际结果、运行环境、严重级别——五项全缺</div>
+          </div></div>
+          <div class="flip-card"><div class="flip-inner">
+            <div class="flip-face flip-front">5. 跑出来一条<strong>红条</strong>，第一反应该做什么？</div>
+            <div class="flip-face flip-back">答案：先核对是代码错了还是测试期望写错了，不要立刻改代码</div>
+          </div></div>
+        </div>
+        <div class="alert warning" style="margin-top:6px;">
+          <p><strong>思考题</strong>：全部测试通过能否说明功能一定满足用户需求？用例是不是写得越多越好？<strong>预习</strong>：版本控制与团队协作——如何让"需求—用例—缺陷"闭环可追溯。</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+  <script>
+    document.querySelectorAll('.flip-card').forEach(function(c){
+      c.addEventListener('click', function(){ c.classList.toggle('open'); });
+    });
+  </script>
+</body>
+
+</html>
