@@ -155,8 +155,8 @@
           <div class="level-row"><div class="level-no">1</div><div class="level-name">导入：为什么会扯皮</div><div class="level-act">承接第5课的"口头约定"，看一次验收现场</div><div class="level-time">约5分钟</div></div>
           <div class="level-row"><div class="level-no">2</div><div class="level-name">概念与方法</div><div class="level-act">测试用例三要素、常用测试设计方法、三类场景、断言、缺陷五要素</div><div class="level-time">约28分钟</div></div>
           <div class="level-row"><div class="level-no">3</div><div class="level-name">例题带教：hello world</div><div class="level-act">用AI写代码写测试，PyCharm+pytest现场跑绿条红条</div><div class="level-time">约18分钟</div></div>
-          <div class="level-row"><div class="level-no">4</div><div class="level-name">核心互动：用例编写工作坊</div><div class="level-act">基于本组任务单写用例集、补断言、填缺陷卡</div><div class="level-time">约27分钟</div></div>
-          <div class="level-row"><div class="level-no">5</div><div class="level-name">小结与作业</div><div class="level-act">可测量、可复现、可追溯；5题快问快答随堂检测</div><div class="level-time">约9分钟</div></div>
+          <div class="level-row"><div class="level-no">4</div><div class="level-name">随堂跟练：跑通第一个测试</div><div class="level-act">跟着演示在自己电脑上跑 hello + pytest，亲眼看一次绿条一次红条</div><div class="level-time">约27分钟</div></div>
+          <div class="level-row"><div class="level-no">5</div><div class="level-name">小结与作业</div><div class="level-act">可测量、可复现、可追溯；4题快问快答随堂检测</div><div class="level-time">约9分钟</div></div>
         </div>
         <div class="summary-bar">
           <p>本课产出：本组测试用例集初稿</p>
@@ -381,35 +381,35 @@ def test_error_type():       with pytest.raises(TypeError): hello(123)</div>
 
     <!-- 第10页 核心互动：工作坊 -->
     <section class="slide">
-      <div class="slide-caption">第10页·随堂作业：用例编写工作坊</div>
+      <div class="slide-caption">第10页·随堂跟练：跟着演示跑通 hello + pytest</div>
       <div class="slide-stage">
         <div class="obj-badge">约 27 分钟</div>
-        <h1 class="slide-title">随堂作业：测试用例编写工作坊</h1>
+        <h1 class="slide-title">随堂跟练：跟着演示跑通第一个测试</h1>
         <div class="title-divider"></div>
         <div class="step-list">
           <div class="step-item">
             <div class="step-num">1</div>
-            <div class="step-title">选一条验收标准</div>
-            <div class="step-desc">基于本组第5次课《需求转化任务单》，选1条核心标准</div>
+            <div class="step-title">打开 PyCharm 新建项目</div>
+            <div class="step-desc">跟老师节奏，新建一个空项目，确保 pytest 已装好</div>
           </div>
           <div class="step-item">
             <div class="step-num">2</div>
-            <div class="step-title">写用例集</div>
-            <div class="step-desc">正常≥2条、边界≥2条、异常≥2条，每条写全三要素（前置条件、输入/操作、期望输出）</div>
+            <div class="step-title">贴提示词让 AI 生成代码</div>
+            <div class="step-desc">把第8页两条提示词贴给 AI（豆包/ChatGPT均可），拿到 hello() 函数和 test_hello.py</div>
           </div>
           <div class="step-item">
             <div class="step-num">3</div>
-            <div class="step-title">补1条断言</div>
-            <div class="step-desc">对其中1条口头约定补写assert：主体＋阈值＋可复现路径</div>
+            <div class="step-title">运行 pytest 看绿条</div>
+            <div class="step-desc">右键运行 test_hello.py，看到全绿——恭喜，你刚写完人生第一份单测</div>
           </div>
           <div class="step-item">
             <div class="step-num">4</div>
-            <div class="step-title">填1张缺陷卡</div>
-            <div class="step-desc">把1条失败（或预判失败）用例填进缺陷记录卡（五要素）</div>
+            <div class="step-title">故意改错一条看红条</div>
+            <div class="step-desc">把某条期望结果改错，跑一次看红条，判断：是代码错了，还是测试期望写错了？</div>
           </div>
         </div>
         <div class="alert success">
-          <p><strong>写完后逐条自查</strong>：①期望输出写了具体值而非"成功""正常"；②边界取到min/min-1/max/max+1/空值；③异常覆盖空值与非法输入；④断言补全三件套；⑤缺陷卡五要素齐全。</p>
+          <p><strong>巡场重点</strong>：①每个人都要看到一次绿条、一次红条；②红条不要立刻改代码，先想清楚"是谁错了"；③没跟上的同学邻座互助，老师巡场答疑。</p>
         </div>
       </div>
     </section>
@@ -419,32 +419,30 @@ def test_error_type():       with pytest.raises(TypeError): hello(123)</div>
       <div class="slide-caption">第11页·小结与随堂检测</div>
       <div class="slide-stage">
         <div class="obj-badge">约 9 分钟</div>
-        <h1 class="slide-title">小结 + 随堂检测：5题快问快答</h1>
+        <h1 class="slide-title">小结 + 随堂检测：4题快问快答</h1>
         <div class="title-divider"></div>
         <div class="summary-bar">
           <p>可测量、可复现、可追溯；测试失败 ≠ 写错代码</p>
         </div>
-        <div class="flip-grid" style="margin-top:14px;">
-          <div class="flip-card"><div class="flip-inner">
-            <div class="flip-face flip-front">1. "用户名6—12位"按<strong>边界值分析</strong>要取哪几个值？</div>
-            <div class="flip-face flip-back">答案：6、5、12、13，外加空值（min、min-1、max、max+1、空值）</div>
-          </div></div>
-          <div class="flip-card"><div class="flip-inner">
-            <div class="flip-face flip-front">2. 哪个属于<strong>无效等价类</strong>？A 正常用户名　B 空用户名　C 正好6位　D 正好12位</div>
-            <div class="flip-face flip-back">答案：B（空用户名）——有效等价类是合法输入，无效等价类是不合法输入</div>
-          </div></div>
-          <div class="flip-card"><div class="flip-inner">
-            <div class="flip-face flip-front">3. "密码至少8位含数字"，正常场景和边界分别用什么方法？</div>
-            <div class="flip-face flip-back">答案：正常=等价类划分取合法代表值（8位含数字）；边界=边界值分析取7/8/9位</div>
-          </div></div>
-          <div class="flip-card"><div class="flip-inner">
-            <div class="flip-face flip-front">4. 失败记录只写"登录失败"，缺了<strong>缺陷五要素</strong>哪几项？</div>
-            <div class="flip-face flip-back">答案：复现步骤、期望结果、实际结果、运行环境、严重级别——五项全缺</div>
-          </div></div>
-          <div class="flip-card"><div class="flip-inner">
-            <div class="flip-face flip-front">5. 跑出来一条<strong>红条</strong>，第一反应该做什么？</div>
-            <div class="flip-face flip-back">答案：先核对是代码错了还是测试期望写错了，不要立刻改代码</div>
-          </div></div>
+        <div style="margin-top:14px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div style="background:var(--bg-blue-100);border-radius:8px;padding:12px 16px;font-size:14px;line-height:1.7;">
+            <b>1.</b> 密码要求"至少8位"。下面哪个属于<b>边界场景</b>？<br>
+            A. 输入8位密码正常登录　B. 输入7位密码<br>
+            C. 密码对但用户名错　D. 断网时点登录
+          </div>
+          <div style="background:var(--bg-blue-100);border-radius:8px;padding:12px 16px;font-size:14px;line-height:1.7;">
+            <b>2.</b> 用户名要求"6—12个<b>小写英文字母</b>"。按边界值分析，要测5个具体输入：刚好6位＝______、刚好12位＝______、5位＝______、13位＝______、空值＝______。
+          </div>
+          <div style="background:var(--bg-blue-100);border-radius:8px;padding:12px 16px;font-size:14px;line-height:1.7;">
+            <b>3.</b> 手机号要求"11位数字"。下面哪种做法符合<b>等价类划分</b>的思想？<br>
+            A. 所有11位组合都试一遍　B. 挑一个合法号测正常、再挑一个非法号测异常，不用每个号都试<br>
+            C. 只测1开头的号　D. 随机输100个号
+          </div>
+          <div style="background:var(--bg-blue-100);border-radius:8px;padding:12px 16px;font-size:14px;line-height:1.7;">
+            <b>4.</b> 一条用例写："输入正确的用户名密码，期望登录成功。"这条用例主要哪里不合格？<br>
+            A. 用户名密码没写长度　B. 期望输出写了"成功"这种空话，没写具体值<br>
+            C. 缺前置条件　D. 缺运行环境
+          </div>
         </div>
         <div class="alert warning" style="margin-top:6px;">
           <p><strong>思考题</strong>：全部测试通过能否说明功能一定满足用户需求？用例是不是写得越多越好？<strong>预习</strong>：版本控制与团队协作——如何让"需求—用例—缺陷"闭环可追溯。</p>
